@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": "tsconfig",
+    "baseUrl": ".",
     "lib": [
       "es2018",
       "dom"
@@ -22,12 +22,21 @@
     "types": [
       "jest",
       "node"
-    ]
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules/@figma"
+    ],
+    "paths": {
+    }
   },
   "include": [
     "src/**/*"
   ],
   "exclude": [
-    "src/*/files/**/*"
+    "src/*/files/**/*",
+    "**/*.spec.ts",
+    "**/test-setup.ts",
+
   ]
 }
