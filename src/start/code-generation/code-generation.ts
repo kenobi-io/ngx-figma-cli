@@ -1,40 +1,33 @@
+import { Resolver } from './resolver';
+import {
+  LayoutConstraint,
+  SetLayoutConstraint,
+  StyleLayout,
+  ParamConstraint,
+  Style
+} from '../../core';
 
 export class CodeGeneration {
 
-  constructor() { }
+  public layoutConstraints: Map<LayoutConstraint, 
+                                SetLayoutConstraint<Partial<Style>>>;
+  private resolver: Resolver;
+  private styleLayout: StyleLayout<Partial<Style>>;
 
-  public generation() { }
+  constructor() {
+    this.resolver = new Resolver();
+    const s = new Style();
+    this.styleLayout = new StyleLayout<Style>(s);
+    this.layoutConstraints = this.resolver.layoutConstraints(this.styleLayout.style);
+  }
+
+  public generation() {
+    const par: any = { };
+    const resultFromApi = { 
+      lc: LayoutConstraint.BOTTOM,
+      param: par
+    }
+    const lc = this.layoutConstraints.get(resultFromApi.lc);
+    this.styleLayout.constraint(lc, resultFromApi.param);
+  }
 }
-
-// // the best var
-// export class SourceAccountP <T extends Partial<Account>>{
-
-//     public model: T;
-
-//     constructor(config: T) {
-//       this.model = Object.assign({}, config);
-//     }
-
-//     public withdraw(amount: number): void {
-//       const text = 'Withdraw: ' + amount;
-//       console.log(text);
-//       this.model.balance -= amount;
-//       console.log('Balance: ' + this.model.balance);
-//     }
-//   }
-//   // ====================================================
-//   export class SourceAccountPp<T>{
-
-//     public model: Partial<Account>;
-
-//     constructor(config: T) {
-//       this.model = Object.assign({}, config);
-//     }
-
-//     public withdraw(amount: number): void {
-//       const text = 'Withdraw: ' + amount;
-//       console.log(text);
-//       this.model.balance -= amount;
-//       console.log('Balance: ' + this.model.balance);
-//     }
-//   }

@@ -121,3 +121,6 @@ yarn-error.log*
 # Mac OSX Finder files.
 **/.DS_Store
 .DS_Store
+
+# project
+src/core/api/figma/figma.plugin-typing.ts

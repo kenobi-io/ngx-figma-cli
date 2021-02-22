@@ -160,15 +160,10 @@ export enum EasingTypeEnum {
     LINEAR = 'LINEAR',
 }
 
-export enum LayoutConstraintVerticalEnum {
+export enum LayoutConstraint {
     TOP = 'TOP',
     BOTTOM = 'BOTTOM',
-    CENTER = 'CENTER',
     TOP_BOTTOM = 'TOP_BOTTOM',
-    SCALE = 'SCALE',
-}
-
-export enum LayoutConstraintHorizontalEnum {
     LEFT = 'LEFT',
     RIGHT = 'RIGHT',
     CENTER = 'CENTER',

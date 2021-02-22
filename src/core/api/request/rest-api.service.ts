@@ -1,5 +1,5 @@
 import { Observable, from } from "rxjs";
-import { InvokeRequest } from './request/invoke.request';
+import { InvokeRequest } from './invoke.request';
 
 export class RestApiService {
 

@@ -1,7 +1,7 @@
 import { environment } from "../../../environments/index";
 import { InvokeRequest } from "./invoke.request";
 import { TypeRequest } from './type.request';
-import { Headers  } from 'node-fetch';
+import { Headers } from 'node-fetch';
 import fetch from 'node-fetch';
 
 export class FilesRequest<T> implements InvokeRequest<T> {
@@ -17,9 +17,8 @@ export class FilesRequest<T> implements InvokeRequest<T> {
         this.filesUrl = `${environment.url}/${environment.versionFile}/${environment.fileKey}`;
     }
 
-    public fetch(param: any): Promise<T> {
-        param.logger.info('[get] FILE_KEY: ' +  this.filesUrl);
-        param.logger.info('[get] DEV_TOKEN: ' +  this.header.get('X-Figma-Token'));
+    public fetch(param?: any): Promise<T> {
+        
         return fetch(this.filesUrl, { headers: this.header })
             .then((response) => {
                 if (!response.ok) {
