@@ -3,7 +3,7 @@ import { ParamBackground } from './param-background';
 import { Style } from '../style';
 
 
-export class ImageBackground<T extends Partial<Style>> 
+export class LinearGradientBackground<T extends Partial<Style>> 
        implements SetBackground<T> {
 
     public style: T;

@@ -9,8 +9,8 @@ export class StyleBackground<T extends Partial<CSSStyleDeclaration>> {
         this.style = style;
     }
 
-    public constraint(setBackground: SetBackground<T> | undefined,
-                      paramBackground: ParamBackground): void {
+    public set(setBackground: SetBackground<T> | undefined,
+               paramBackground: ParamBackground): void {
 
         if (setBackground) {
             setBackground.set(paramBackground);

@@ -3,7 +3,7 @@ import { ParamBackground } from './param-background';
 import { Style } from '../style';
 
 
-export class ImageBackground<T extends Partial<Style>> 
+export class RadialGradientBackground<T extends Partial<Style>> 
        implements SetBackground<T> {
 
     public style: T;
@@ -13,6 +13,8 @@ export class ImageBackground<T extends Partial<Style>>
     }
     
     public set(cb: ParamBackground) {
-        this.style.background = this.style.paintToRadialGradient(cb.lastFill);
+        if (this.style.paintToRadialGradient) {
+            this.style.background = this.style.paintToRadialGradient(cb.lastFill);
+        }
     }
 }

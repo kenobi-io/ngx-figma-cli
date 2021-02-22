@@ -65,11 +65,4 @@ export class Style extends CSSStyleDeclaration{
         }
         return undefined;
     }
-
-    public getPaint(paintList: PaintPropertyFigma[]): PaintPropertyFigma | null {
-        if (paintList && paintList.length > 0) {
-            return paintList[paintList.length - 1];
-        }
-        return null;
-    }
 }
