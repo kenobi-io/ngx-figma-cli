@@ -1,12 +1,12 @@
-import { 
+import {
     BottomConstraint,
     CenterConstraint,
-    LayoutConstraint, 
-    LeftConstraint, 
-    LeftRightConstraint, 
-    RightConstraint, 
-    ScaleConstraint, 
-    SetLayoutConstraint, 
+    LayoutConstraint,
+    LeftConstraint,
+    LeftRightConstraint,
+    RightConstraint,
+    ScaleConstraint,
+    SetLayoutConstraint,
     TypePaintEnum,
     SetBackground,
     ImageBackground,
@@ -24,59 +24,67 @@ import {
 
 export class Resolver {
 
-    public layoutConstraints(style: Partial<CSSStyleDeclaration>): 
-                             Map<LayoutConstraint,
-                             SetLayoutConstraint<Partial<CSSStyleDeclaration>>> {
-        const lc = new Map();
-        lc.set(LayoutConstraint.LEFT_RIGHT,
+    public lcsMap:
+        Map<LayoutConstraint,
+            SetLayoutConstraint<Partial<CSSStyleDeclaration>>>;
+    public backgroundMap:
+        Map<TypePaintEnum,
+            SetBackground<Partial<CSSStyleDeclaration>>>;
+    public effectMap:
+        Map<EffectEnum,
+            SetEffect<Partial<CSSStyleDeclaration>>>;
+    public fontMap:
+        Map<string,
+            SetFont<Partial<CSSStyleDeclaration>>>;
+
+    constructor(style: Partial<CSSStyleDeclaration>) {
+        this.layoutConstraints(style);
+        this.background(style);
+        this.effect(style);
+        this.font(style);
+    }
+
+    public layoutConstraints(style: Partial<CSSStyleDeclaration>) {
+        this.lcsMap = new Map();
+        this.lcsMap.set(LayoutConstraint.LEFT_RIGHT,
             new LeftRightConstraint(style));
-        lc.set(LayoutConstraint.LEFT,
+        this.lcsMap.set(LayoutConstraint.LEFT,
             new LeftConstraint(style));
-        lc.set(LayoutConstraint.RIGHT,
+        this.lcsMap.set(LayoutConstraint.RIGHT,
             new RightConstraint(style));
-        lc.set(LayoutConstraint.SCALE,
+        this.lcsMap.set(LayoutConstraint.SCALE,
             new ScaleConstraint(style));
-        lc.set(LayoutConstraint.CENTER,
+        this.lcsMap.set(LayoutConstraint.CENTER,
             new CenterConstraint(style));
-        lc.set(LayoutConstraint.BOTTOM,
+        this.lcsMap.set(LayoutConstraint.BOTTOM,
             new BottomConstraint(style));
-        return lc;
     }
 
-    public background(style: Partial<CSSStyleDeclaration>): 
-                             Map<TypePaintEnum,
-                             SetBackground<Partial<CSSStyleDeclaration>>> {
-        const bg = new Map();
-        bg.set(TypePaintEnum.IMAGE,
+    public background(style: Partial<CSSStyleDeclaration>) {
+        this.backgroundMap = new Map();
+        this.backgroundMap .set(TypePaintEnum.IMAGE,
             new ImageBackground(style));
-        bg.set(TypePaintEnum.SOLID,
+        this.backgroundMap .set(TypePaintEnum.SOLID,
             new SolidBackground(style));
-        bg.set(TypePaintEnum.GRADIENT_LINEAR,
+        this.backgroundMap .set(TypePaintEnum.GRADIENT_LINEAR,
             new LinearGradientBackground(style));
-        bg.set(TypePaintEnum.GRADIENT_RADIAL,
+        this.backgroundMap .set(TypePaintEnum.GRADIENT_RADIAL,
             new RadialGradientBackground(style));
-        return bg;
     }
 
-    public effect(style: Partial<CSSStyleDeclaration>): 
-                         Map<EffectEnum,
-                         SetEffect<Partial<CSSStyleDeclaration>>> {
-        const ef = new Map();
-        ef.set(EffectEnum.DROP_SHADOW,
+    public effect(style: Partial<CSSStyleDeclaration>) {
+        this.effectMap = new Map();
+        this.effectMap.set(EffectEnum.DROP_SHADOW,
             new DropShadowEffect(style));
-        ef.set(EffectEnum.INNER_SHADOW,
+        this.effectMap.set(EffectEnum.INNER_SHADOW,
             new InnerShadowEffect(style));
-        ef.set(EffectEnum.LAYER_BLUR,
+        this.effectMap.set(EffectEnum.LAYER_BLUR,
             new LayerBlurEffect(style));
-        return ef;
     }
 
-    public font(style: Partial<CSSStyleDeclaration>): 
-                         Map<string,
-                         SetFont<Partial<CSSStyleDeclaration>>> {
-        const ef = new Map();
-        ef.set('apply', new ApplyFont(style));
-        return ef;
+    public font(style: Partial<CSSStyleDeclaration>) {
+        this.fontMap = new Map();
+        this.fontMap.set('apply', new ApplyFont(style));
     }
 
 }

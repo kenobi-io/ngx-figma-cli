@@ -1,7 +1,7 @@
 import { SetEffect } from './set-effect';
 import { ParamEffect } from './param-effect';
 
-export class StyleEffect<T extends Partial<CSSStyleDeclaration>> {
+export class EffectStyle<T extends Partial<CSSStyleDeclaration>> {
 
     public style: T;
 

@@ -13,9 +13,13 @@ export class ImageBackground<T extends Partial<Style>>
     }
     
     public set(cb: ParamBackground) {
-        if (this.style.imageUrl && this.style.backgroundSizeIsFill) {
+        if (this.style.imageUrl) {
             this.style.backgroundImage = this.style.imageUrl(cb.lastFill.imageRef);
-            this.style.backgroundSize = this.style.backgroundSizeIsFill(cb.lastFill.scaleMode);
+            if (cb.lastFill.scaleMode === 'FILL') {
+                this.style.backgroundSize = 'cover';
+            } else {
+                this.style.backgroundSize = undefined;
+            }
         }
     }
 }

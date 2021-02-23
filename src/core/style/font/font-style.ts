@@ -1,7 +1,7 @@
 import { SetFont } from './set-font';
 import { ParamFont } from './param-font';
 
-export class StyleFont<T extends Partial<CSSStyleDeclaration>> {
+export class FontStyle<T extends Partial<CSSStyleDeclaration>> {
 
     public style: T;
 

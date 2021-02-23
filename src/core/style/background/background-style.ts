@@ -1,7 +1,7 @@
 import { SetBackground } from './set-background';
 import { ParamBackground } from './param-background';
 
-export class StyleBackground<T extends Partial<CSSStyleDeclaration>> {
+export class BackgroundStyle<T extends Partial<CSSStyleDeclaration>> {
 
     public style: T;
 

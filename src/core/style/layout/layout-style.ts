@@ -1,7 +1,7 @@
 import { ParamConstraint } from "./constraints/param-constraint";
 import { SetLayoutConstraint } from "./constraints/set-layout-constraint";
 
-export class StyleLayout<T extends Partial<CSSStyleDeclaration>> {
+export class LayoutStyle<T extends Partial<CSSStyleDeclaration>> {
 
     public style: T;
 
@@ -11,7 +11,6 @@ export class StyleLayout<T extends Partial<CSSStyleDeclaration>> {
 
     public constraint(setLayoutConstraint: SetLayoutConstraint<T> | undefined,
                       constraintParam: ParamConstraint<T>): void {
-
         if (setLayoutConstraint) {
             setLayoutConstraint.set(constraintParam);
         } else {

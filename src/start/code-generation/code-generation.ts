@@ -1,76 +1,74 @@
 import { Resolver } from './resolver';
 import {
   LayoutConstraint,
-  SetLayoutConstraint,
-  StyleLayout,
+  LayoutStyle,
   Style,
-  StyleBackground,
+  BackgroundStyle,
   TypePaintEnum,
-  SetBackground,
   RectangleFigma,
-  EffectPropertyFigma
+  EffectPropertyFigma,
+  EffectStyle,
+  FontStyle,
+  ParamEffect,
+  ParamFont
 } from '../../core';
 
 export class CodeGeneration {
 
-  public lcsMap: Map<LayoutConstraint, 
-                                   SetLayoutConstraint<Partial<CSSStyleDeclaration>>>;
-  public backgroundMap: Map<TypePaintEnum, 
-                            SetBackground<Partial<CSSStyleDeclaration>>>;
   private resolver: Resolver;
-  private styleLayout: StyleLayout<Partial<CSSStyleDeclaration>>;
-  private styleBackground: StyleBackground<Partial<CSSStyleDeclaration>>;
+  private layoutStyle: LayoutStyle<Partial<CSSStyleDeclaration>>;
+  private backgroundStyle: BackgroundStyle<Partial<CSSStyleDeclaration>>;
+  private effectStyle: EffectStyle<Partial<CSSStyleDeclaration>>;
+  private fontStyle: FontStyle<Partial<CSSStyleDeclaration>>;
 
   constructor() {
-    this.resolver = new Resolver();
-    const s = new Style();
-    this.styleLayout = new StyleLayout<Style>(s);
-    this.styleBackground = new StyleBackground<Style>(s);
-    this.lcsMap = this.resolver.layoutConstraints(this.styleLayout.style);
-    this.backgroundMap = this.resolver.background(this.styleLayout.style);
+    const style = new Style();
+    this.resolver = new Resolver(style);
+    this.layoutStyle = new LayoutStyle<Style>(style);
+    this.backgroundStyle = new BackgroundStyle<Style>(style);
+    this.effectStyle = new EffectStyle<Style>(style);
+    this.fontStyle = new FontStyle<Style>(style);
   }
 
   public generation() {
-    const par: any = { };
-    const bgPar: any = { };
-    const resultFromApi = { 
-      lc: LayoutConstraint.BOTTOM,
-      param: par,
-      bg: TypePaintEnum.SOLID,
-      node: { } as RectangleFigma,
-      bgParam: bgPar
+
+    const mockResult = {
+      lcKey: LayoutConstraint.BOTTOM,
+      lcParam: {} as any,
+      bgKey: TypePaintEnum.SOLID,
+      node: {} as RectangleFigma,
+      bgParam: {} as any,
+      effects: [] as EffectPropertyFigma[],
+      effectParam: {} as ParamEffect,
+      fontKey: 'apply',
+      fontParam: { } as ParamFont
     }
-    this.styleLayout.constraint(this.lcsMap.get(resultFromApi.lc), resultFromApi.param);
+
+    // layout
+    const setLC = this.resolver.lcsMap.get(mockResult.lcKey);
+    this.layoutStyle.constraint(setLC, mockResult.lcParam);
+
+    // backgound
     let lastFill;
-    if (resultFromApi.node.fills && resultFromApi.node.fills.length > 0) {
-        lastFill = resultFromApi.node.fills[resultFromApi.node.fills.length - 1];
+    if (mockResult.node.fills && mockResult.node.fills.length > 0) {
+      lastFill = mockResult.node.fills[mockResult.node.fills.length - 1];
     } else {
-        lastFill = null;
+      lastFill = null;
     }
     if (lastFill) {
-        this.styleBackground.set(this.backgroundMap.get(lastFill.type), resultFromApi.bgParam);
+      const setBackground = this.resolver.backgroundMap.get(lastFill.type);
+      this.backgroundStyle.set(setBackground, mockResult.bgParam);
     }
+
+    // effect
+    for (let i = 0; i < mockResult.effects.length; i++) {
+      const effect = mockResult.effects[i];
+      const setEffect = this.resolver.effectMap.get(effect.type);
+      this.effectStyle.set(setEffect, mockResult.effectParam);
+    }
+
+    // font
+    const setFont = this.resolver.fontMap.get(mockResult.fontKey);
+    this.fontStyle.set(setFont, mockResult.)
   }
-
-    //   // role layout.cnstraint()
-    //   public layoutConstraint(
-    //     style: any,
-    //     bound: any,
-    //     horizontal: LayoutConstraintHorizontalEnum,
-    //     vertical: LayoutConstraintVerticalEnum,
-    //     outerStyle?: any,
-    //     outerClass?: any): void {
-
-    //     this.setStyle[horizontal](style, bound, outerStyle, outerClass);
-    //     this.setStyle[vertical](style, bound, outerStyle, outerClass);
-    // }
-
-
-    // role effect.set()
-    public setEffect(effects: EffectPropertyFigma[], style: any): void {
-        for (let i = 0; i < effects.length; i++) {
-            const effect = effects[i];
-            this.setStyle[effect.type](effect, style);
-        }
-    }
 }

@@ -58,11 +58,4 @@ export class Style extends CSSStyleDeclaration{
         const squash = hash.split('-').join('');
         return `url(https://s3-us-west-2.amazonaws.com/figma-alpha/img/${squash.substring(0, 4)}/${squash.substring(4, 8)}/${squash.substring(8)})`;
     }
-
-    public backgroundSizeIsFill(scaleMode: string): string | undefined {
-        if (scaleMode === 'FILL') {
-            return 'cover';
-        }
-        return undefined;
-    }
 }
