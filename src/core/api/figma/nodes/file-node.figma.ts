@@ -7,8 +7,8 @@ export interface FileNodeFigma {
     role: String,
     lastModified: String,
     thumbnailUrl: String,
-    err: String,
-    nodes: NodeFigma
+    err: String, // ? does't exist in real responce
+    nodes: NodeFigma, // ? does't exist in real responce
     schemaVersion: number,
     styles: Map<String, StylePropertyFigma>,
     version: number,

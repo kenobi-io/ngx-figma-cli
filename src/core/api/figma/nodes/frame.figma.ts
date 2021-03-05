@@ -10,7 +10,11 @@ import {
     VectorPropertyFigma,
     TransformPropertyFigma,
     LayoutGridPropertyFigma,
-    EffectPropertyFigma
+    EffectPropertyFigma,
+    PathPropertyFigma,
+    StrokeAlignEnum,
+    StrokeCapEnum,
+    StrokeJoinEnum
 } from "../properties/properties";
 /** A node of fixed size containing other nodes */
 export interface FrameFigma {
@@ -56,6 +60,29 @@ export interface FrameFigma {
     isMask: boolean;
     /** default: false Does this mask ignore fill style (like gradients) and effects? */
     isMaskOutline: boolean;
+
+    strokes: PaintPropertyFigma[];
+    /** The weight of strokes on the node */
+    strokeWeight: number;
+    strokeCap?: StrokeCapEnum;
+    /** Only specified if parameter geometry=paths is used. An array of paths representing the object stroke */
+    strokeGeometry?: PathPropertyFigma[];
+    /** Where stroke is drawn relative to the vector outline as a string enum
+    "INSIDE": draw stroke inside the shape boundary
+    "OUTSIDE": draw stroke outside the shape boundary
+    "CENTER": draw stroke centered along the shape boundary */
+    strokeAlign: StrokeAlignEnum
+    /** A string enum with value of "MITER", "BEVEL", or "ROUND", describing
+     * how corners in vector paths are rendered. */
+    strokeJoin?: StrokeJoinEnum;
+    /** An array of floating point numbers describing the pattern of dash length and
+     *  gap lengths that the vector path follows. For example a value of [1, 2]
+     * indicates that the path has a dash of length 1 followed by a gap of length 2, repeated. */
+    strokeDashes?: number[];
+    /** Only valid if strokeJoin is "MITER". The corner angle, in degrees,
+     * below which strokeJoin will be set to "BEVEL" to avoid super sharp corners.
+     *  By default this is 28.96 degrees. */
+    strokeMiterAngle?: number;
 }
 
 

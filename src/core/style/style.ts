@@ -1,10 +1,10 @@
-import { 
-    ColorPropertyFigma, 
+import {
+    ColorPropertyFigma,
     PaintPropertyFigma,
     EffectPropertyFigma
 } from "../api";
 
-export class Style extends CSSStyleDeclaration{
+export class Style extends CSSStyleDeclaration {
 
     public colorToString(color: ColorPropertyFigma | any): string {
         return `rgba(${Math.round(color.r * 255)},
@@ -57,5 +57,12 @@ export class Style extends CSSStyleDeclaration{
     public imageUrl(hash: string): string {
         const squash = hash.split('-').join('');
         return `url(https://s3-us-west-2.amazonaws.com/figma-alpha/img/${squash.substring(0, 4)}/${squash.substring(4, 8)}/${squash.substring(8)})`;
+    }
+
+    public lastPaint(paints: PaintPropertyFigma[]):  PaintPropertyFigma | null {
+        if (paints && paints.length > 0) {
+            return paints[paints.length - 1];
+        }
+        return null;
     }
 }

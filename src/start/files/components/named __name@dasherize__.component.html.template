@@ -1,0 +1,6 @@
+<% 
+    const users = ['one', 'two', 'free'];
+%>
+<%users.forEach(function(user) {%>
+    Use: <%=user%>
+<%})%>

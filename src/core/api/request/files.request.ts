@@ -17,7 +17,7 @@ export class FilesRequest<T> implements InvokeRequest<T> {
         this.filesUrl = `${environment.url}/${environment.versionFile}/${environment.fileKey}`;
     }
 
-    public fetch(param?: any): Promise<T> {
+    public fetch(_param?: any): Promise<T> {
         
         return fetch(this.filesUrl, { headers: this.header })
             .then((response) => {
