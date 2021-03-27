@@ -1,348 +1,396 @@
-// import { visitNode } from 'typescript';
-// import {
-//   LayoutConstraint,
-//   LayoutStyle,
-//   Style,
-//   BackgroundStyle,
-//   TypePaintEnum,
-//   RectangleFigma,
-//   EffectPropertyFigma,
-//   EffectStyle,
-//   EffectParamStyle,
-//   ParamFont,
-//   EffectSetStyle,
-//   LayoutParamStyle,
-//   DocumentFigma,
-//   StrokeStyle,
-//   BackgroundSetStyle,
-//   LayoutSetStyle,
-//   StrokeSetStyle,
-//   FontSetStyle,
-//   FontStyle
-// } from '../../core';
+import {
+  LayoutConstraints,
+  LayoutStyle,
+  Style,
+  BackgroundStyle,
+  TypePaints,
+  RectangleFigma,
+  EffectPropertyFigma,
+  EffectStyle,
+  EffectParamStyle,
+  FontParamStyle,
+  EffectSetStyle,
+  LayoutParamStyle,
+  DocumentFigma,
+  StrokeStyle,
+  BackgroundSetStyle,
+  LayoutSetStyle,
+  StrokeSetStyle,
+  FontSetStyle,
+  FontStyle,
+  ParagraphSetMarkup,
+  ParagraphMarkup,
+  Markup,
+  ParagraphParamMarkup,
+  NodeTypes,
+  DivSetMarkup,
+  DivMarkup,
+  DivParamMarkup
+} from '../../core';
 
-// export class CodeGeneration {
+export class CodeGeneration {
 
-//   // private resolver: Resolver;
-//   private layoutStyle: LayoutSetStyle;
-//   private bgStyle: BackgroundSetStyle;
-//   private effectStyle: EffectSetStyle;
-//   private strokeStyle: StrokeSetStyle;
-//   private fontStyle: FontSetStyle;
+  // private resolver: Resolver;
+  private layoutStyle: LayoutSetStyle;
+  private bgStyle: BackgroundSetStyle;
+  private effectStyle: EffectSetStyle;
+  private strokeStyle: StrokeSetStyle;
+  private fontStyle: FontSetStyle;
+  private phSetMarkup: ParagraphSetMarkup;
+  private divSetMarkup: DivSetMarkup;
 
-//   constructor() {
-//     const style = new Style();
-//     // this.resolver = new Resolver(style);
-//     this.layoutStyle = new LayoutStyle(style);
-//     this.bgStyle = new BackgroundStyle(style);
-//     this.effectStyle = new EffectStyle(style);
-//     this.strokeStyle = new StrokeStyle(style);
-//     this.fontStyle = new FontStyle(style);
-//   }
+  constructor() {
+    const style = new Style();
+    const markup = new Markup();
+    this.layoutStyle = new LayoutStyle(style);
+    this.bgStyle = new BackgroundStyle(style);
+    this.effectStyle = new EffectStyle(style);
+    this.strokeStyle = new StrokeStyle(style);
+    this.fontStyle = new FontStyle(style);
+    this.phSetMarkup = new ParagraphMarkup(markup);
+    this.divSetMarkup = new DivMarkup(markup);
+  }
 
-//   public generation() {
+  public generate(result: any) {
+    // require('dotenv').config()
+    // const fetch = require('node-fetch');
+    // const fs = require('fs');
+    // const figma = require('./lib/figma');
 
-//     const mockResult = {
-//       lcKey: LayoutConstraint.BOTTOM,
-//       lcParam: {} as LayoutParamStyle,
-//       bgKey: TypePaintEnum.SOLID,
-//       node: {} as RectangleFigma,
-//       bgParam: {} as any,
-//       effects: [] as EffectPropertyFigma[],
-//       effectParam: {} as EffectParamStyle,
-//       fontKey: 'apply',
-//       fontParam: {} as ParamFont,
-//       doc: {} as DocumentFigma
-//     }
+    // const headers = new fetch.Headers();
+    const componentList = [];
+    // let devToken = process.env.DEV_TOKEN;
 
-//     // // backgound
-//     // let lastFill;
-//     // } else {
-//     //   lastFill = null;
-//     // }
-//     // // font
-//     // const setFont = this.resolver.fontMap.get(mockResult.fontKey);
-//     // this.fontStyle.set(setFont, mockResult.fontParam);
+    // if (process.argv.length < 3) {
+    //   console.log('Usage: node setup.js <file-key> [figma-dev-token]');
+    //   process.exit(0);
+    // }
 
+    // if (process.argv.length > 3) {
+    //   devToken = process.argv[3];
+    // }
 
-//     const canvas = mockResult.doc.children[0];
-//     for (let i = 0; i < canvas.children.length; i++) {
-//       const child = canvas.children[i]
-//       if (child.name.charAt(0) === '#' && child.visible !== false) {
-//         const child = canvas.children[i];
-//         // fromFigma.createComponent(child, images, componentMap);
-//         this.setLayout(child, mockResult.bgParam);
-//         this.bgStyle.set(child.type, { value: child });
-//         this.setEffect(child.effects, this.effectStyle);
-//         this.strokeStyle.set(child.type, { value: child });
-//         this.fontStyle.set(child.type, { value: child.style });
-//       }
-//     }
-//   }
+    // headers.append('X-Figma-Token', devToken);
 
-//   private setLayout(child: any, lcParam: LayoutParamStyle) {
+    // const fileKey = process.argv[2];
+    // const baseUrl = 'https://api.figma.com';
 
-//     if (child.order) {
-//       lcParam.outerStyle.zIndex = child.order;
-//     }
-//     const cHorizontal = child.constraints && child.constraints.horizontal;
-//     const cVertical = child.constraints && child.constraints.vertical;
-//     lcParam.isVerical = false;
-//     this.layoutStyle.set(cHorizontal, lcParam)
-//     lcParam.isVerical = true;
-//     this.layoutStyle.set(cVertical, lcParam);
-//   }
-
-//   private setEffect(effects: EffectPropertyFigma[], effectSetStyle: EffectSetStyle) {
-//     for (let effect of effects) {
-//       effectSetStyle.set(effect.type, { value: effect });
-//     }
-//   }
-
-//   printDiv(styles, outerStyle, indent, nodeName = 'div') {
-//     print(`<div [ngStyle]="${JSON.stringify(outerStyle).replace(/"/g, "'")}" class="${outerClass.replace(/"/g, "'")}">`, indent);
-//     if (nodeName !== 'div') {
-//       print(`  <${nodeName} [props]="props"`, indent);
-//     } else {
-//       print(`  <div`, indent);
-//     }
-//     print(`    id="${node.id}"`, indent);
-//     print(`    [ngStyle]="${JSON.stringify(styles).replace(/"/g, "'")}"`, indent);
-//     print(`    class="${innerClass}"`, indent);
-//     print(`  >`, indent);
-//     if (nodeName !== 'div') {
-//       print(`</${nodeName}>`, '')
-//       print(`</div>`, '')
-//     }
-//   }
-
-//   applyFontStyle(_styles, fontStyle) {
-//     if (fontStyle) {
-//       _styles.fontSize = fontStyle.fontSize + 'px';
-//       _styles.fontWeight = fontStyle.fontWeight;
-//       _styles.fontFamily = fontStyle.fontFamily;
-//       _styles.textAlign = fontStyle.textAlignHorizontal;
-//       _styles.fontStyle = fontStyle.italic ? 'italic' : 'normal';
-//       _styles.lineHeight = `${fontStyle.lineHeightPercent * 1.25}%`;
-//       _styles.letterSpacing = `${fontStyle.letterSpacing}px`;
-//     }
-//   }
-
-//   visitNode(node, parent, lastVertical, indent) {
+    // const vectorMap = {};
+    // const vectorList = [];
+    // const vectorTypes = ['VECTOR', 'LINE', 'REGULAR_POLYGON', 'ELLIPSE', 'STAR'];
 
 
-//     let content = null;
-//     let img = null;
-//     const styles = {};
-//     let minChildren = [];
-//     const maxChildren = [];
-//     const centerChildren = [];
-//     let bounds = null;
-//     let nodeBounds = null;
 
-//     if (parent != null) {
-//       nodeBounds = node.absoluteBoundingBox;
-//       const nx2 = nodeBounds.x + nodeBounds.width;
-//       const ny2 = nodeBounds.y + nodeBounds.height;
-//       const parentBounds = parent.absoluteBoundingBox;
-//       const px = parentBounds.x;
-//       const py = parentBounds.y;
+    // let resp = await fetch(`${baseUrl}/v1/files/${fileKey}`, { headers });
+    // let data = await resp.json();
+    let data = result;
 
-//       bounds = {
-//         left: nodeBounds.x - px,
-//         right: px + parentBounds.width - nx2,
-//         top: lastVertical == null ? nodeBounds.y - py : nodeBounds.y - lastVertical,
-//         bottom: py + parentBounds.height - ny2,
-//         width: nodeBounds.width,
-//         height: nodeBounds.height,
-//       }
-//     }
+    const doc = data.document;
+    const canvas = doc.children[0];
+    let html = '';
 
-//     expandChildren(node, parent, minChildren, maxChildren, centerChildren, 0);
+    for (let i = 0; i < canvas.children.length; i++) {
+      const child = canvas.children[i]
+      if (child.name.charAt(0) === '#' && child.visible !== false) {
+        const child = canvas.children[i];
+        this.preprocessTree(child);
+      }
+    }
 
-//     //layout
+    let guids = vectorList.join(',');
+    data = await fetch(`${baseUrl}/v1/images/${fileKey}?ids=${guids}&format=svg`, { headers });
+    const imageJSON = await data.json();
 
-//     let outerClass = 'outerDiv';
-//     let innerClass = 'innerDiv';
-//     const outerStyle = {};
-//     // // sublayout
+    const images = imageJSON.images || {};
+    if (images) {
+      let promises = [];
+      let guids = [];
+      for (const guid in images) {
+        if (images[guid] == null) continue;
+        guids.push(guid);
+        promises.push(fetch(images[guid]));
+      }
 
-//     // // sublayout
-//     // background
-//     // if (['FRAME', 'RECTANGLE', 'INSTANCE', 'COMPONENT'].indexOf(node.type) >= 0) {
-//     //   // subbackground
-//     // // effect
-//     // // stroke
-//     // }
-//     // else 
-//     if (node.type === 'TEXT') {
+      let responses = await Promise.all(promises);
+      promises = [];
+      for (const resp of responses) {
+        promises.push(resp.text());
+      }
 
-//       // // background
-//       // // stroke
-//       // //font
+      responses = await Promise.all(promises);
+      for (let i = 0; i < responses.length; i++) {
+        images[guids[i]] = responses[i].replace('<svg ', '<svg preserveAspectRatio="none" ');
+      }
+    }
 
-//       if (node.name.substring(0, 6) === 'input:') {
+    const componentMap = {};
+    let contents = `import { NgModule } from '@angular/core';\n`;
+    contents += `import { FormsModule } from '@angular/forms';\n`;
+    contents += `import { CommonModule } from '@angular/common';\n`;
+    let nextSection = ``;
 
-//         // named __name@dasherize__.component.ts.template
-//         content = [
-//           `<input key="${node.id}"` +
-//           `type="text" placeholder="${node.characters}"` +
-//           ` name="${node.name.substring(7)}" />`];
+    for (let i = 0; i < canvas.children.length; i++) {
+      const child = canvas.children[i]
+      if (child.name.charAt(0) === '#' && child.visible !== false) {
+        const child = canvas.children[i];
+        this.createComponent(child, images, componentMap);
+      }
+    }
 
-//       } else 
-//       if (node.characterStyleOverrides) {
+    const imported = {};
+    const components = [];
+    for (const key in componentMap) {
+      const component = componentMap[key];
+      const name = component.name;
+      if (!imported[name]) {
+        contents += `import { ${name}Component } from './${name}.component';\n`;
+        components.push(name + 'Component');
+      }
+      imported[name] = true;
+    }
+    contents += "\n";
+    contents += nextSection;
+    nextSection = '';
 
-//         let para = '';
-//         const ps = [];
-//         const styleCache = {};
-//         let currStyle = 0;
+    nextSection += '@NgModule({\n';
+    nextSection += '  imports: [ CommonModule, FormsModule ],\n',
+      nextSection += `  declarations: [ ${components.join(', ')} ],\n`
+    nextSection += `  exports: [ ${components.join(', ')} ],\n`
+    nextSection += `})\n`;
+    nextSection += `export class FigmaModule { }`;
 
-//         const commitParagraph = (key) => {
-//           if (para !== '') {
-//             if (styleCache[currStyle] == null && currStyle !== 0) {
-//               styleCache[currStyle] = {};
-//               applyFontStyle(styleCache[currStyle], node.styleOverrideTable[currStyle]);
-//             }
+    contents += nextSection;
 
-//             const styleOverride = styleCache[currStyle] ? JSON.stringify(styleCache[currStyle]) : '{}';
-//             let varname;
-//             if (node.name.charAt(0) === '$') {
-//               varName = node.name.substring(1);
-//             }
-//             if (varName) {
-//               para = `
-//                 <ng-container *ngIf="props?.${varName}">{{props.${varName}}}</ng-container>
-//                 <ng-container *ngIf="!props?.${varName}">${para}</ng-container>
-//                 `;
-//             }
-//             ps.push(`<span [ngStyle]="${styleOverride.replace(/"/g, "'")}" key="${key}">${para}</span>`);
-//             para = '';
-//           }
-//         }
+    const path = "./src/components/figma.module.ts";
+    fs.writeFile(path, contents, function (err) {
+      if (err) console.log(err);
+      console.log(`wrote ${path}`);
+    });
 
-//         for (const i in node.characters) {
-//           let idx = node.characterStyleOverrides[i];
+  }
 
-//           if (node.characters[i] === '\n') {
-//             commitParagraph(i);
-//             ps.push(`<br key="${`br${i}`}" />`);
-//             continue;
-//           }
+  private preprocessTree(node) {
+    let vectorsOnly = node.name.charAt(0) !== '#';
+    let vectorVConstraint = null;
+    let vectorHConstraint = null;
 
-//           if (idx == null) idx = 0;
-//           if (idx !== currStyle) {
-//             commitParagraph(i);
-//             currStyle = idx;
-//           }
+    if (this.paintsRequireRender(node.fills)
+        || this.paintsRequireRender(node.strokes)
+        || (node.blendMode != null 
+        && ['PASS_THROUGH', 'NORMAL'].indexOf(node.blendMode) < 0)) {
+      node.type = 'VECTOR';
+    }
 
-//           para += node.characters[i];
-//         }
-//         commitParagraph('end');
+    const children = node.children && node.children.filter((child) => child.visible !== false);
+    if (children) {
+      for (let j = 0; j < children.length; j++) {
+        if (vectorTypes.indexOf(children[j].type) < 0) vectorsOnly = false;
+        else {
+          if (vectorVConstraint != null && children[j].constraints.vertical != vectorVConstraint) vectorsOnly = false;
+          if (vectorHConstraint != null && children[j].constraints.horizontal != vectorHConstraint) vectorsOnly = false;
+          vectorVConstraint = children[j].constraints.vertical;
+          vectorHConstraint = children[j].constraints.horizontal;
+        }
+      }
+    }
+    node.children = children;
 
-//         content = ps;
-//       } else {
-//         content = node.characters.split("\n").map((line, idx) => `<div key="${idx}">${line}</div>`);
-//       }
-//     }
+    if (children && children.length > 0 && vectorsOnly) {
+      node.type = 'VECTOR';
+      node.constraints = {
+        vertical: vectorVConstraint,
+        horizontal: vectorHConstraint,
+      };
+    }
+
+    if (vectorTypes.indexOf(node.type) >= 0) {
+      node.type = 'VECTOR';
+      vectorMap[node.id] = node;
+      vectorList.push(node.id);
+      node.children = [];
+    }
+
+    if (node.children) {
+      for (const child of node.children) {
+        this.preprocessTree(child);
+      }
+    }
+  }
+
+  private paintsRequireRender(paints) {
+    if (!paints) return false;
+
+    let numPaints = 0;
+    for (const paint of paints) {
+      if (paint.visible === false) continue;
+
+      numPaints++;
+      if (paint.type === 'EMOJI') return true;
+    }
+
+    return numPaints > 1;
+  }
+
+  private createComponent(component: any, _imgMap: any, componentMap: any) {
 
 
-//     if (parent != null) {
-//       printDiv(styles, outerStyle, indent);
-//     }
+    const name = 'C' + component.name.replace(/\W+/g, '');
+    const instance = name + component.id.replace(';', 'S').replace(':', 'D');
 
-//     if (node.id !== component.id && node.name.charAt(0) === '#') {
-//       const nodeName = node.name.replace(/\W+/g, '');
-//       // TODO: parse props
-//       printDiv(styles, outerStyle, indent, `app-C${nodeName}`);
-//       createComponent(node, imgMap, componentMap);
-//     } else if (node.type === 'VECTOR') {
-//       // print html
-//       print(`<div class="vector">${imgMap[node.id]}</div>`, indent);
-//     } else {
-//       const newNodeBounds = node.absoluteBoundingBox;
-//       const newLastVertical = newNodeBounds && newNodeBounds.y + newNodeBounds.height;
-//       print(`    <div>`, indent);
-//       let first = true;
-//       for (const child of minChildren) {
-//         visitNode(child, node, first ? null : newLastVertical, indent + '      ');
-//         first = false;
-//       }
-//       for (const child of centerChildren) visitNode(child, node, null, indent + '      ');
-//       if (maxChildren.length > 0) {
-//         outerClass += ' maxer';
-//         styles.width = '100%';
-//         styles.pointerEvents = 'none';
-//         styles.backgroundColor = null;
-//         printDiv(styles, outerStyle, indent + '      ');
-//         first = true;
-//         for (const child of maxChildren) {
-//           visitNode(child, node, first ? null : newLastVertical, indent + '          ');
-//           first = false;
-//         }
-//         print(`        </div>`, indent);
-//         print(`      </div>`, indent);
-//       }
-//       if (content != null) {
-//         if (node.name.charAt(0) === '$') {
-//           const varName = node.name.substring(1);
-//           for (const piece of content) {
-//             print(piece, indent + '        ');
-//           }
-//         } else {
-//           for (const piece of content) {
-//             print(piece, indent + '      ');
-//           }
-//         }
-//       }
-//       print(`    </div>`, indent);
-//     }
+    let doc = '';
 
-//     if (parent != null) {
-//       print(`  </div>`, indent);
-//       print(`</div>`, indent);
-//     }
-//   }
+    const path = `src/components/${name}.component.ts`;
 
-//   createComponent(component, imgMap, componentMap) {
+    if (!fs.existsSync(path)) {
+      const componentSrc = `
+            import { Component, Input } from '@angular/core';
+          import { NodeTypes } from '../../core/api/figma/properties/enums.property-figma';
+import { DivParamMarkup } from '../../core/markup/div/div-param-markup';
 
-//     const name = 'C' + component.name.replace(/\W+/g, '');
-//     const instance = name + component.id.replace(';', 'S').replace(':', 'D');
+            @Component({
+              selector: 'app-${name}',
+              templateUrl: '${name}.component.html',
+            })
+            export class ${name}Component  {
+              @Input() props: any;
+            }
+            `;
+      fs.writeFile(path, componentSrc, function (err: any) {
+        if (err) console.log(err);
+        console.log(`wrote ${path}`);
+      });
+    }
 
-//     let doc = '';
 
-//     const path = `src/components/${name}.component.ts`;
+    this.visitNode(component, null, null, '  ');
 
-//     if (!fs.existsSync(path)) {
-//       const componentSrc = `
-//           import { Component, Input } from '@angular/core';
-//           import { FrameFigma } from '../../core/api/figma/nodes/frame.figma';
-//           import { LayoutParamStyle } from '../../core/style/layout/layout-param-style';
+    const htmPath = `src/components/${name}.component.html`;
+    fs.writeFile(htmPath, doc, function (err: any) {
+      if (err) console.log(err);
+      console.log(`wrote ${htmPath}`);
+    });
+    componentMap[component.id] = { instance, name, doc };
+  }
 
-//           @Component({
-//             selector: 'app-${name}',
-//             templateUrl: '${name}.component.html',
-//           })
-//           export class ${name}Component  {
-//             @Input() props: any;
-//           }
-//           `;
-//       fs.writeFile(path, componentSrc, function (err) {
-//         if (err) console.log(err);
-//         console.log(`wrote ${path}`);
-//       });
-//     }
+  private visitNode(node: { absoluteBoundingBox: any, children: [] },
+    parent: Window | null | any,
+    lastVertical: number | null,
+    _indent: any) {
 
-//     function print(msg, indent) {
-//       doc += `${indent}${msg}\n`;
-//     }
+    let minChildren: any[] = [];
+    const maxChildren: any[] = [];
+    const centerChildren: any[] = [];
+    let bounds = null;
+    let nodeBounds = null;
 
-//     visitNode(component, null, null, '  ');
+    if (parent != null) {
+      nodeBounds = node.absoluteBoundingBox;
+      const nx2 = nodeBounds.x + nodeBounds.width;
+      const ny2 = nodeBounds.y + nodeBounds.height;
+      const parentBounds = parent.absoluteBoundingBox;
+      const px = parentBounds.x;
+      const py = parentBounds.y;
 
-//     const htmPath = `src/components/${name}.component.html`;
-//     fs.writeFile(htmPath, doc, function (err) {
-//       if (err) console.log(err);
-//       console.log(`wrote ${htmPath}`);
-//     });
-//     componentMap[component.id] = { instance, name, doc };
-//   }
-// }
+      bounds = {
+        left: nodeBounds.x - px,
+        right: px + parentBounds.width - nx2,
+        top: lastVertical == null ? nodeBounds.y - py : nodeBounds.y - lastVertical,
+        bottom: py + parentBounds.height - ny2,
+        width: nodeBounds.width,
+        height: nodeBounds.height,
+      }
+    }
+
+    this.expandChildren(node, parent, minChildren, maxChildren, centerChildren, 0);
+
+    const phPMp = {} as ParagraphParamMarkup;
+    phPMp.fontSetStyle = this.fontStyle;
+    const div = {} as DivParamMarkup;
+    
+    if (node.order) {
+      mockResult.bgParam.outerStyle.zIndex = node.order;
+    }
+    const cHorizontal = node.constraints && node.constraints.horizontal;
+    const cVertical = node.constraints && node.constraints.vertical;
+    mockResult.bgParam.isVertical = false;
+    this.layoutStyle.set(cHorizontal, mockResult.bgParam)
+    mockResult.bgParam.isVertical = true;
+    this.layoutStyle.set(cVertical, mockResult.bgParam);
+
+    this.bgStyle.set(node.type, { value: node });
+    for (let effect of node.effects) {
+      this.effectStyle.set(effect.type, { value: effect });
+    }
+    this.strokeStyle.set(node.type, { value: node });
+    this.fontStyle.set(node.type, { value: node.style });
+    this.phSetMarkup.set(node.type, phPMp);
+    this.divSetMarkup.set(node.type, div);
+  }
+
+  private expandChildren(node: any,
+    parent: null,
+    minChildren: any[],
+    maxChildren: any[],
+    centerChildren: any[],
+    offset: number) {
+    const children = node.children;
+    let added = offset;
+
+    if (children) {
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+
+        if (parent != null
+          && (node.type === 'COMPONENT'
+            || node.type === 'INSTANCE')) {
+          child.constraints = {
+            vertical: 'TOP_BOTTOM',
+            horizontal: 'LEFT_RIGHT'
+          };
+        }
+
+        if (NodeTypes.GROUP === child.type
+          || NodeTypes.BOOLEAN_OPERATION === child.type) {
+          added += this.expandChildren(child,
+            parent,
+            minChildren,
+            maxChildren,
+            centerChildren,
+            added + i);
+          continue;
+        }
+
+        child.order = i + added;
+
+        if (child.constraints
+          && child.constraints.vertical === 'BOTTOM') {
+          maxChildren.push(child);
+        } else if (child.constraints
+          && child.constraints.vertical === 'TOP') {
+          minChildren.push(child);
+        } else {
+          centerChildren.push(child);
+        }
+      }
+
+      minChildren.sort(this.nodeSort);
+      maxChildren.sort(this.nodeSort);
+
+      return added + children.length - offset;
+    }
+
+    return added - offset;
+  }
+
+  private nodeSort(a: any, b: any): number {
+    if (a.absoluteBoundingBox.y < b.absoluteBoundingBox.y) {
+      return -1;
+    } else if (a.absoluteBoundingBox.y === b.absoluteBoundingBox.y) {
+      return 0;
+    } else {
+      return 1;
+    }
+  }
+
+  // visitNode(node, parent, lastVertical, indent)
+}

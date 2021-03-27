@@ -1,4 +1,4 @@
-import { NodeTypeEnum } from "../properties/properties";
+import { NodeTypes } from "../properties/properties";
 
 /**
 * Node type indicates what kind of node you are working with: for example,
@@ -13,7 +13,7 @@ export interface NodeFigma {
     /** default: true. Whether or not the node is visible on the canvas.*/
     visible: boolean;
     /** The type of the node, refer to table below for details.*/
-    type: NodeTypeEnum;
+    type: NodeTypes;
     /** Data written by plugins that is visible only to the plugin
      *  that wrote it.Requires the`pluginData` to include the ID of the plugin.*/
     pluginData: any;

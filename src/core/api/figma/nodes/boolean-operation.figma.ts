@@ -1,5 +1,5 @@
 import { VectorFigma } from "./vector.figma";
-import { BooleanOperationEnum } from "../properties/properties";
+import { BooleanOperations } from "../properties/properties";
 /** A group that has a boolean operation applied to it */
 export interface BooleanOperationFigma extends VectorFigma {
     /** An array of nodes that are being boolean operated on */
@@ -7,5 +7,5 @@ export interface BooleanOperationFigma extends VectorFigma {
     /** A string enum with value of
      * "UNION", "INTERSECT", "SUBTRACT",
      * or "EXCLUDE" indicating the type of boolean operation applied */
-    booleanOperation: BooleanOperationEnum;
+    booleanOperation: BooleanOperations;
 }

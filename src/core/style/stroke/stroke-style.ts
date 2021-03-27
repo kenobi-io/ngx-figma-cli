@@ -1,5 +1,5 @@
 import { Style } from "../style";
-import { NodeTypeEnum, TypePaintEnum } from '../../api';
+import { NodeTypes, TypePaints } from '../../api';
 import { StrokeSetStyle } from "./stroke-set-style";
 import { StrokeParamStyle } from './stroke-param-style';
 
@@ -7,14 +7,14 @@ export class StrokeStyle implements StrokeSetStyle {
 
 
     public style: Partial<Style>;
-    private strokeMap: Map<NodeTypeEnum, Function>;
+    private strokeMap: Map<NodeTypes, Function>;
 
     constructor(style: Partial<Style>) {
         this.style = style;
         this.stroke();
     }
 
-    public set(nodeTypeEnum: NodeTypeEnum, strokeParamStyle: StrokeParamStyle): void {
+    public set(nodeTypeEnum: NodeTypes, strokeParamStyle: StrokeParamStyle): void {
         if (nodeTypeEnum) {
             const func = this.strokeMap.get(nodeTypeEnum);
             func && func(strokeParamStyle);
@@ -23,11 +23,11 @@ export class StrokeStyle implements StrokeSetStyle {
 
     private stroke() {
         this.strokeMap = new Map();
-        this.strokeMap.set(NodeTypeEnum.RECTANGLE,
+        this.strokeMap.set(NodeTypes.RECTANGLE,
             this.borderRect);
-        this.strokeMap.set(NodeTypeEnum.RECTANGLE,
+        this.strokeMap.set(NodeTypes.RECTANGLE, // =-> duplicate key is fail
             this.radiusRect);
-        this.strokeMap.set(NodeTypeEnum.TEXT,
+        this.strokeMap.set(NodeTypes.TEXT,
             this.text);
     }
 
@@ -35,7 +35,7 @@ export class StrokeStyle implements StrokeSetStyle {
         if (this.style.colorToString && this.style.lastPaint) {
             const lastStroke = this.style.lastPaint(sps.value.strokes);
             if (lastStroke) {
-                if (lastStroke.type === TypePaintEnum.SOLID) {
+                if (lastStroke.type === TypePaints.SOLID) {
                     const weight = sps.value.strokeWeight || 1;
                     this.style.border = 
                     `${weight}px solid ${this.style.colorToString(lastStroke.color)}`;

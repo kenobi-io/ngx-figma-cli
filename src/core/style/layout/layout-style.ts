@@ -1,19 +1,19 @@
 import { Style } from "../style";
 import { LayoutParamStyle } from "./layout-param-style";
 import { LayoutSetStyle } from "./layout-set-style";
-import { LayoutConstraint } from '../../api';
+import { LayoutConstraints } from '../../api';
 export class LayoutStyle implements LayoutSetStyle {
 
 
     public style: Partial<Style>;
-    private layoutMap: Map<LayoutConstraint | string, Function>;
+    private layoutMap: Map<LayoutConstraints | string, Function>;
 
     constructor(style: Partial<Style>) {
         this.style = style;
         this.layout();
     }
 
-    public set(layoutConstraint: LayoutConstraint, layoutParamStyle: LayoutParamStyle): void {
+    public set(layoutConstraint: LayoutConstraints, layoutParamStyle: LayoutParamStyle): void {
         if (layoutConstraint) {
             const func = this.layoutMap.get(layoutConstraint);
             func && func(layoutParamStyle);
@@ -22,21 +22,21 @@ export class LayoutStyle implements LayoutSetStyle {
 
     private layout() {
         this.layoutMap = new Map();
-        this.layoutMap.set(LayoutConstraint.LEFT_RIGHT,
+        this.layoutMap.set(LayoutConstraints.LEFT_RIGHT,
             this.leftRight);
-        this.layoutMap.set(LayoutConstraint.LEFT,
+        this.layoutMap.set(LayoutConstraints.LEFT,
             this.left);
-        this.layoutMap.set(LayoutConstraint.RIGHT,
+        this.layoutMap.set(LayoutConstraints.RIGHT,
             this.right);
-        this.layoutMap.set(LayoutConstraint.SCALE,
+        this.layoutMap.set(LayoutConstraints.SCALE,
             this.scale);
-        this.layoutMap.set(LayoutConstraint.CENTER,
+        this.layoutMap.set(LayoutConstraints.CENTER,
             this.center);
-        this.layoutMap.set(LayoutConstraint.TOP_BOTTOM,
+        this.layoutMap.set(LayoutConstraints.TOP_BOTTOM,
             this.bottomTop);
-        this.layoutMap.set(LayoutConstraint.BOTTOM,
+        this.layoutMap.set(LayoutConstraints.BOTTOM,
             this.bottom);
-        this.layoutMap.set(LayoutConstraint.TOP,
+        this.layoutMap.set(LayoutConstraints.TOP,
             this.top);
     }
 
@@ -64,9 +64,9 @@ export class LayoutStyle implements LayoutSetStyle {
     }
 
     private scale(lps: LayoutParamStyle) {
-        //  ver
+        
         lps.outerClass += ' centerer';
-        if (lps.value) {
+        if (lps.isVertical && lps.value) {
             this.style.height = lps.value.height && lps.value.height + 'px';
             const parentHeight = Number.parseFloat(lps.value.top) +
                 Number.parseFloat(lps.value.height) +
@@ -79,8 +79,7 @@ export class LayoutStyle implements LayoutSetStyle {
 
         }
 
-        // hor
-        if (lps.value) {
+        if (lps.isVertical && lps.value) {
             const parentWidth = Number.parseFloat(lps.value.left) +
                 Number.parseFloat(lps.value.width) +
                 Number.parseFloat(lps.value.right);
@@ -89,25 +88,28 @@ export class LayoutStyle implements LayoutSetStyle {
         }
     }
     private center(lps: LayoutParamStyle) {
-        // ver
-        lps.outerClass += ' centerer';
-        lps.outerStyle.alignItems = 'center';
 
-        if (lps.value) {
-            this.style.height = lps.value.height && lps.value.height + 'px';
-            this.style.marginTop =
-                `${Number.parseFloat(lps.value.top)
-                - Number.parseFloat(lps.value.bottom)}`;
-            this.style.marginTop += 'px';;
-        }
-        // hor
-        lps.outerStyle.justifyContent = 'center';
-        if (lps.value) {
-            this.style.width = lps.value.width + 'px';
-            this.style.marginLeft = lps.value.left && lps.value.right
-                ? `${Number.parseFloat(lps.value.left) - Number.parseFloat(lps.value.right)}`
-                : undefined;
-            this.style.marginLeft += 'px';
+        if (lps.isVertical) {
+            lps.outerClass += ' centerer';
+            lps.outerStyle.alignItems = 'center';
+
+            if (lps.value) {
+                this.style.height = lps.value.height && lps.value.height + 'px';
+                this.style.marginTop =
+                    `${Number.parseFloat(lps.value.top)
+                    - Number.parseFloat(lps.value.bottom)}`;
+                this.style.marginTop += 'px';;
+            }
+        } else {
+
+            lps.outerStyle.justifyContent = 'center';
+            if (lps.value) {
+                this.style.width = lps.value.width + 'px';
+                this.style.marginLeft = lps.value.left && lps.value.right
+                    ? `${Number.parseFloat(lps.value.left) - Number.parseFloat(lps.value.right)}`
+                    : undefined;
+                this.style.marginLeft += 'px';
+            }
         }
     }
     private bottom(lps: LayoutParamStyle) {

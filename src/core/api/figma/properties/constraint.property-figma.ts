@@ -1,4 +1,4 @@
-import { ConstrainTypeEnum } from "./enums.property-figma";
+import { ConstrainTypes } from "./enums.property-figma";
 /** Sizing constraint for exports */
 export interface ConstraintPropertyFigma {
     /**
@@ -7,7 +7,7 @@ export interface ConstraintPropertyFigma {
      * "WIDTH": Scale proportionally and set width to value
      * "HEIGHT": Scale proportionally and set height to value
      */
-    type: ConstrainTypeEnum;
+    type: ConstrainTypes;
     /** See type property for effect of this field */
     value: number;
 }

@@ -1,5 +1,5 @@
 // import { LayoutConstraintVerticalEnum, LayoutConstraintHorizontalEnum } from "./enums.property-figma";
-import { LayoutConstraint } from "./enums.property-figma";
+import { LayoutConstraints } from "./enums.property-figma";
 export interface LayoutConstraintPropertyFigma {
     // /**
     // * Vertical constraint as an enum
@@ -19,5 +19,5 @@ export interface LayoutConstraintPropertyFigma {
     //  * "SCALE": Node scales horizontally with containing frame
     //  */
     // horizontal: LayoutConstraintHorizontalEnum;
-    constraint: LayoutConstraint;
+    constraint: LayoutConstraints;
 }

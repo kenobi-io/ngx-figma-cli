@@ -1,11 +1,11 @@
 import { EffectParamStyle } from './effect-param-style';
-import { EffectEnum } from '../../api';
+import { Effects } from '../../api';
 import { Style } from '../style';
 import { SetStyle } from '../set-style';
 
-export interface EffectSetStyle extends SetStyle<Partial<Style>, EffectEnum> {
+export interface EffectSetStyle extends SetStyle<Partial<Style>, Effects> {
     style: Partial<Style>;
-    set(effectEnum: EffectEnum, effectParamStyle: EffectParamStyle): void;
+    set(effectEnum: Effects, effectParamStyle: EffectParamStyle): void;
 }
 
 

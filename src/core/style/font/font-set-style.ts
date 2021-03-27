@@ -1,9 +1,9 @@
-import { NodeTypeEnum } from '../../api';
+import { NodeTypes } from '../../api';
 import { SetStyle } from '../set-style';
 import { Style } from '../style';
 import { FontParamStyle } from './font-param-style';
 
-export interface FontSetStyle extends SetStyle<Partial<Style>, NodeTypeEnum> {
+export interface FontSetStyle extends SetStyle<Partial<Style>, NodeTypes> {
     style: Partial<Style>;
-    set(nodeTypeEnum: NodeTypeEnum, fontParamStyle: FontParamStyle): void;
+    set(nodeTypeEnum: NodeTypes, fontParamStyle: FontParamStyle): void;
 }

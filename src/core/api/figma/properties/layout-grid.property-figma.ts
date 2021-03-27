@@ -1,4 +1,4 @@
-import { LayoutGridPatternEnum, LayoutGridAligmentEnum } from "./enums.property-figma";
+import { LayoutGridPatterns, LayoutGridAligments } from "./enums.property-figma";
 import { ColorPropertyFigma } from "./color.property-figma";
 /** Guides to align and place objects within a frame */
 export interface LayoutGridPropertyFigma {
@@ -8,7 +8,7 @@ export interface LayoutGridPropertyFigma {
      * "ROWS": Horizontal grid
      * "GRID": Square grid
      */
-    pattern: LayoutGridPatternEnum;
+    pattern: LayoutGridPatterns;
     /** Width of column grid or height of row grid or square grid spacing */
     sectionSize: number;
     /** Is the grid currently visible? */
@@ -22,7 +22,7 @@ export interface LayoutGridPropertyFigma {
      * "MAX": Grid starts at the right or bottom of the frame
      * "CENTER": Grid is center aligned
      */
-    alignment: LayoutGridAligmentEnum;
+    alignment: LayoutGridAligments;
     /** Spacing in between columns and rows */
     gutterSize: number;
     /** Spacing before the first column or row */

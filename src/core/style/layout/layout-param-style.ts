@@ -5,5 +5,5 @@ export interface LayoutParamStyle extends ParamStyle {
     value: Style;
     outerStyle: Style;
     outerClass: string;
-    isVerical: boolean;
+    isVertical: boolean;
 }

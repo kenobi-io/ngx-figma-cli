@@ -2,19 +2,19 @@ import { NodeFigma } from "./node.figma";
 import {
     ColorPropertyFigma,
     ExportSettingPropertyFigma,
-    BlendModeEnum,
+    BlendModes,
     LayoutConstraintPropertyFigma,
     PaintPropertyFigma,
-    EasingTypeEnum,
+    EasingTypes,
     RectanglePropertyFigma,
     VectorPropertyFigma,
     TransformPropertyFigma,
     LayoutGridPropertyFigma,
     EffectPropertyFigma,
     PathPropertyFigma,
-    StrokeAlignEnum,
-    StrokeCapEnum,
-    StrokeJoinEnum
+    StrokeAligns,
+    StrokeCaps,
+    StrokeJoins
 } from "../properties/properties";
 /** A node of fixed size containing other nodes */
 export interface FrameFigma {
@@ -31,7 +31,7 @@ export interface FrameFigma {
     /** default: [] An array of export settings representing images to export from node */
     exportSettings: ExportSettingPropertyFigma[];
     /** How this node blends with nodes behind it in the scene (see blend mode section for more details) */
-    blendMode: BlendModeEnum;
+    blendMode: BlendModes;
     /** default: false Keep height and width constrained to same ratio */
     preserveRatio: boolean;
     /** Horizontal and vertical layout constraints for node */
@@ -41,7 +41,7 @@ export interface FrameFigma {
     /** default: null The duration of the prototyping transition on this node (in milliseconds). */
     transitionDuration?: number | null;
     /** default: null The easing curve used in the prototyping transition on this node. */
-    transitionEasing?: EasingTypeEnum | null;
+    transitionEasing?: EasingTypes | null;
     /** default: 1 Opacity of the node */
     opacity: number;
     /** Bounding box of the node in absolute space coordinates */
@@ -64,17 +64,17 @@ export interface FrameFigma {
     strokes: PaintPropertyFigma[];
     /** The weight of strokes on the node */
     strokeWeight: number;
-    strokeCap?: StrokeCapEnum;
+    strokeCap?: StrokeCaps;
     /** Only specified if parameter geometry=paths is used. An array of paths representing the object stroke */
     strokeGeometry?: PathPropertyFigma[];
     /** Where stroke is drawn relative to the vector outline as a string enum
     "INSIDE": draw stroke inside the shape boundary
     "OUTSIDE": draw stroke outside the shape boundary
     "CENTER": draw stroke centered along the shape boundary */
-    strokeAlign: StrokeAlignEnum
+    strokeAlign: StrokeAligns
     /** A string enum with value of "MITER", "BEVEL", or "ROUND", describing
      * how corners in vector paths are rendered. */
-    strokeJoin?: StrokeJoinEnum;
+    strokeJoin?: StrokeJoins;
     /** An array of floating point numbers describing the pattern of dash length and
      *  gap lengths that the vector path follows. For example a value of [1, 2]
      * indicates that the path has a dash of length 1 followed by a gap of length 2, repeated. */

@@ -1,18 +1,18 @@
 import { FontSetStyle } from './font-set-style';
 import { FontParamStyle } from './font-param-style';
-import { NodeTypeEnum } from '../../api';
+import { NodeTypes } from '../../api';
 import { Style } from '../style';
 export class FontStyle implements FontSetStyle {
 
     public style: Partial<Style>;
-    private fontMap: Map<NodeTypeEnum, Function>;
+    private fontMap: Map<NodeTypes, Function>;
 
     constructor(style: Partial<Style>) {
         this.style = style;
         this.font();
     }
 
-    public set(nodeTypeEnum: NodeTypeEnum, fontParamStyle: FontParamStyle): void {
+    public set(nodeTypeEnum: NodeTypes, fontParamStyle: FontParamStyle): void {
         if (nodeTypeEnum) {
             const func = this.fontMap.get(nodeTypeEnum);
             func && func(fontParamStyle);
@@ -21,8 +21,7 @@ export class FontStyle implements FontSetStyle {
 
     private font() {
         this.fontMap = new Map();
-        this.fontMap.set(NodeTypeEnum.TEXT,
-            this.text);
+        this.fontMap.set(NodeTypes.TEXT, this.text);
     }
     
     public text(pf: FontParamStyle) {

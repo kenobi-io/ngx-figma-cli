@@ -1,12 +1,12 @@
 import { EffectSetStyle } from './effect-set-style';
 import { EffectParamStyle } from './effect-param-style';
-import { EffectEnum } from '../../api';
+import { Effects } from '../../api';
 import { Style } from '../style';
 
 export class EffectStyle implements EffectSetStyle {
 
     public style: Partial<Style>;
-    private effectsMap: Map<EffectEnum, Function>;
+    private effectsMap: Map<Effects, Function>;
 
     constructor(style: Partial<Style>) {
         this.style = style;
@@ -14,7 +14,7 @@ export class EffectStyle implements EffectSetStyle {
     }
 
 
-    public set(effectEnum: EffectEnum, effectParamStyle: EffectParamStyle): void {
+    public set(effectEnum: Effects, effectParamStyle: EffectParamStyle): void {
         if(effectEnum) {
             const func = this.effectsMap.get(effectEnum);  
             func && func(effectParamStyle);
@@ -23,9 +23,9 @@ export class EffectStyle implements EffectSetStyle {
 
     private effects() {
         this.effectsMap = new Map();
-        this.effectsMap.set(EffectEnum.DROP_SHADOW, this.dropShadowEffect);
-        this.effectsMap.set(EffectEnum.INNER_SHADOW, this.innerShadowEffect);
-        this.effectsMap.set(EffectEnum.LAYER_BLUR, this.layerBlurEffect);
+        this.effectsMap.set(Effects.DROP_SHADOW, this.dropShadowEffect);
+        this.effectsMap.set(Effects.INNER_SHADOW, this.innerShadowEffect);
+        this.effectsMap.set(Effects.LAYER_BLUR, this.layerBlurEffect);
     }
 
     private dropShadowEffect(pe: EffectParamStyle) {

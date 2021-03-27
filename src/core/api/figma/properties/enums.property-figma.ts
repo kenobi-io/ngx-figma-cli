@@ -1,5 +1,5 @@
 /** A string enum with value, describing the end caps of vector paths. */
-export enum StrokeCapEnum {
+export enum StrokeCaps {
     NONE = 'NONE',
     ROUND = 'ROUND',
     SQUARE = 'SQUARE',
@@ -7,7 +7,7 @@ export enum StrokeCapEnum {
     TRIANGLE_ARROW = 'TRIANGLE_ARROW',
 }
 
-export enum NodeTypeEnum {
+export enum NodeTypes {
     FRAME = 'FRAME',
     RECTANGLE = 'RECTANGLE',
     INSTANCE = 'INSTANCE',
@@ -25,28 +25,35 @@ export enum NodeTypeEnum {
     SLICE = 'SLICE'
 }
 
+export enum Characters {
+    HASH = 'HASH',
+    PARENT_START = 'PARENT_START',
+    PARENT_END = 'PARENT_END',
+    DEFAULT = 'DEFUALT'
+}
+
 /** Where stroke is drawn relative to the vector outline as a string enum */
-export enum StrokeAlignEnum {
+export enum StrokeAligns {
     INSIDE = 'INSIDE',
     OUTSIDE = 'OUTSIDE',
     CENTER = 'CENTER',
 }
 
 /** A string enum with value, describing how corners in vector paths are rendered. */
-export enum StrokeJoinEnum {
+export enum StrokeJoins {
     MITER = 'MITER',
     BEVEL = 'BEVEL',
     ROUND = 'ROUND',
 }
 
-export enum ImageEnum {
+export enum Images {
     JPG = 'JPG',
     PNG = 'PNG',
     SVG = 'SVG',
 }
 
 /** A string enum with value, indicating the type of boolean operation applied */
-export enum BooleanOperationEnum {
+export enum BooleanOperations {
     UNION = 'UNION',
     INTERSECT = 'INTERSECT',
     SUBTRACT = 'SUBTRACT',
@@ -54,7 +61,7 @@ export enum BooleanOperationEnum {
 }
 
 /** Text casing applied to the node, default is the original casing */
-export enum TextCaseEnum {
+export enum TextCases {
     ORIGINAL = 'ORIGINAL',
     UPPER = 'UPPER',
     LOWER = 'LOWER',
@@ -62,14 +69,14 @@ export enum TextCaseEnum {
 }
 
 /** Text decoration applied to the node */
-export enum TextDecorationEnum {
+export enum TextDecorations {
     NONE = 'NONE',
     STRIKETHROUGH = 'STRIKETHROUGH',
     UNDERLINE = 'UNDERLINE',
 }
 
 /** The unit of the line height value specified by the user. */
-export enum LineHeightUnitEnum {
+export enum LineHeightUnits {
     PIXELS = 'PIXELS',
     'FONT_SIZE_%' = 'FONT_SIZE_%',
     'INTRINSIC_%' = 'INTRINSIC_%',
@@ -108,7 +115,7 @@ export enum LineHeightUnitEnum {
  * "COLOR"  
  * "LUMINOSITY"  
  */
-export enum BlendModeEnum {
+export enum BlendModes {
     // Normal blends:
     /** (Only applicable to objects with children) */
     PASS_THROUGH = "PASS_THROUGH",
@@ -150,7 +157,7 @@ export enum BlendModeEnum {
  * "EASE_OUT": Ease out with an animation curve similar to CSS ease-out.  
  * "EASE_IN_AND_OUT": Ease in and then out with an animation curve similar to CSS ease-in-out.  
  */
-export enum EasingTypeEnum {
+export enum EasingTypes {
     /** Ease in with an animation curve similar to CSS ease-in. */
     EASE_IN = 'EASE_IN',
     /** Ease out with an animation curve similar to CSS ease-out. */
@@ -160,7 +167,7 @@ export enum EasingTypeEnum {
     LINEAR = 'LINEAR',
 }
 
-export enum LayoutConstraint {
+export enum LayoutConstraints {
     TOP = 'TOP',
     BOTTOM = 'BOTTOM',
     TOP_BOTTOM = 'TOP_BOTTOM',
@@ -171,31 +178,31 @@ export enum LayoutConstraint {
     SCALE = 'SCALE',
 }
 
-export enum LayoutGridPatternEnum {
+export enum LayoutGridPatterns {
     COLUMNS = 'COLUMNS',
     ROWS = 'ROWS',
     GRID = 'GRID',
 }
 
-export enum LayoutGridAligmentEnum {
+export enum LayoutGridAligments {
     MIN = 'MIN',
     MAX = 'MAX',
     CENTER = 'CENTER',
 }
 
-export enum PathWindingRuleEnum {
+export enum PathWindingRules {
     EVENODD = 'EVENODD',
     NONZERO = 'NONZERO',
 }
 
-export enum EffectEnum {
+export enum Effects {
     INNER_SHADOW = 'INNER_SHADOW',
     DROP_SHADOW = 'DROP_SHADOW',
     LAYER_BLUR = 'LAYER_BLUR',
     BACKGROUND_BLUR = 'BACKGROUND_BLUR',
 }
 
-export enum TypePaintEnum {
+export enum TypePaints {
     SOLID = 'SOLID',
     GRADIENT_LINEAR = 'GRADIENT_LINEAR',
     GRADIENT_RADIAL = 'GRADIENT_RADIAL',
@@ -205,14 +212,14 @@ export enum TypePaintEnum {
     EMOJI = 'EMOJI',
 }
 
-export enum ScaleModePaintEnum {
+export enum ScaleModePaints {
     FILL = 'FILL',
     FIT = 'FIT',
     TILE = 'TILE',
     STRETCH = 'STRETCH',
 }
 
-export enum ConstrainTypeEnum {
+export enum ConstrainTypes {
     /** Scale by value */
     SCALE = 'SCALE',
     /** Scale proportionally and set width to value */
@@ -221,7 +228,7 @@ export enum ConstrainTypeEnum {
     HEIGHT = 'HEIGHT',
 }
 
-export enum StyleTypeEnum {
+export enum StyleTypes {
     FILL = 'FILL',
     TEXT = 'TEXT',
     EFFECT = 'EFFECT',

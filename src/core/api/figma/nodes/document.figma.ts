@@ -1,9 +1,9 @@
-import { NodeTypeEnum } from "../properties/properties";
+import { NodeTypes } from "../properties/properties";
 /** The root node  Figma*/
 export interface DocumentFigma {
     id: string,
     name: string,
-    type: NodeTypeEnum,
+    type: NodeTypes,
     /** An array of canvases attached to the document */
     children: any[];
 }

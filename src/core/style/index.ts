@@ -19,3 +19,5 @@ export * from './stroke/stroke-set-style';
 export * from './stroke/stroke-style';
 
 export * from './style';
+export * from './set-style';
+export * from './param-style';

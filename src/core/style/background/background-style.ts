@@ -2,8 +2,8 @@
 // import { ParamBackground } from './param-background';
 
 import {
-    NodeTypeEnum,
-    TypePaintEnum,
+    NodeTypes,
+    TypePaints,
     FrameFigma,
     RectangleFigma
 } from "../../api";
@@ -14,14 +14,14 @@ import { BackgroundSetStyle } from "./bg-set-style";
 export class BackgroundStyle implements BackgroundSetStyle {
 
     public style: Partial<Style>;
-    private bgsMap: Map<TypePaintEnum | NodeTypeEnum, Function>;
+    private bgsMap: Map<TypePaints | NodeTypes, Function>;
 
     constructor(style: Partial<Style>) {
         this.style = style;
         this.bg();
     }
 
-    public set(bgEnum: TypePaintEnum | NodeTypeEnum, 
+    public set(bgEnum: TypePaints | NodeTypes, 
                bgParamStyle: BackgroundParamStyle): void {
         const func = this.bgsMap.get(bgEnum);
         func && func(bgParamStyle);
@@ -29,22 +29,22 @@ export class BackgroundStyle implements BackgroundSetStyle {
 
     private bg() {
         this.bgsMap = new Map();
-        this.bgsMap.set(TypePaintEnum.IMAGE,
+        this.bgsMap.set(TypePaints.IMAGE,
             this.image);
-        this.bgsMap.set(TypePaintEnum.SOLID,
+        this.bgsMap.set(TypePaints.SOLID,
             this.solid);
-        this.bgsMap.set(TypePaintEnum.GRADIENT_LINEAR,
+        this.bgsMap.set(TypePaints.GRADIENT_LINEAR,
             this.linearGradient);
-        this.bgsMap.set(TypePaintEnum.GRADIENT_RADIAL,
+        this.bgsMap.set(TypePaints.GRADIENT_RADIAL,
             this.radialGradient);
             
-        this.bgsMap.set(NodeTypeEnum.FRAME,
+        this.bgsMap.set(NodeTypes.FRAME,
             this.fraComInst);
-        this.bgsMap.set(NodeTypeEnum.COMPONENT,
+        this.bgsMap.set(NodeTypes.COMPONENT,
             this.fraComInst);
-        this.bgsMap.set(NodeTypeEnum.INSTANCE,
+        this.bgsMap.set(NodeTypes.INSTANCE,
             this.fraComInst);
-        this.bgsMap.set(NodeTypeEnum.TEXT,
+        this.bgsMap.set(NodeTypes.TEXT,
             this.text);
     }
 
