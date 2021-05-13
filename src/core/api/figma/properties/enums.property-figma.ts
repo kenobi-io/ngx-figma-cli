@@ -25,6 +25,14 @@ export enum NodeTypes {
     SLICE = 'SLICE'
 }
 
+export enum Vectors {
+    VECTOR = 'VECTOR', 
+    LINE = 'LINE', 
+    REGULAR_POLYGON = 'REGULAR_POLYGON', 
+    ELLIPSE = 'ELLIPSE', 
+    STAR = 'STAR'
+}
+
 export enum Characters {
     HASH = 'HASH',
     PARENT_START = 'PARENT_START',

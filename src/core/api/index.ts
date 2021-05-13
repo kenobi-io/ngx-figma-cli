@@ -5,6 +5,5 @@ export * from './request/images.request';
 export * from './request/image.request';
 export * from './request/invoke.request';
 export * from './request/result.request';
-export * from './request/type.request';
 export * from './figma/nodes/nodes';
 export * from './figma/properties/properties';

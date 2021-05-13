@@ -1,17 +1,12 @@
+import { switchMap, catchError } from 'rxjs/operators';
+import * as fs from "fs";
+
 import {
-  LayoutConstraints,
   LayoutStyle,
   Style,
   BackgroundStyle,
-  TypePaints,
-  RectangleFigma,
-  EffectPropertyFigma,
   EffectStyle,
-  EffectParamStyle,
-  FontParamStyle,
   EffectSetStyle,
-  LayoutParamStyle,
-  DocumentFigma,
   StrokeStyle,
   BackgroundSetStyle,
   LayoutSetStyle,
@@ -25,7 +20,11 @@ import {
   NodeTypes,
   DivSetMarkup,
   DivMarkup,
-  DivParamMarkup
+  DivParamMarkup,
+  RestApiService,
+  ImagesRequest,
+  ImageRequest,
+  Vectors
 } from '../../core';
 
 export class CodeGeneration {
@@ -38,6 +37,7 @@ export class CodeGeneration {
   private fontStyle: FontSetStyle;
   private phSetMarkup: ParagraphSetMarkup;
   private divSetMarkup: DivSetMarkup;
+  private api: RestApiService;
 
   constructor() {
     const style = new Style();
@@ -49,40 +49,13 @@ export class CodeGeneration {
     this.fontStyle = new FontStyle(style);
     this.phSetMarkup = new ParagraphMarkup(markup);
     this.divSetMarkup = new DivMarkup(markup);
+    this.api = new RestApiService();
   }
 
-  public generate(result: any) {
-    // require('dotenv').config()
-    // const fetch = require('node-fetch');
-    // const fs = require('fs');
-    // const figma = require('./lib/figma');
-
-    // const headers = new fetch.Headers();
-    const componentList = [];
-    // let devToken = process.env.DEV_TOKEN;
-
-    // if (process.argv.length < 3) {
-    //   console.log('Usage: node setup.js <file-key> [figma-dev-token]');
-    //   process.exit(0);
-    // }
-
-    // if (process.argv.length > 3) {
-    //   devToken = process.argv[3];
-    // }
-
-    // headers.append('X-Figma-Token', devToken);
-
-    // const fileKey = process.argv[2];
-    // const baseUrl = 'https://api.figma.com';
-
-    // const vectorMap = {};
-    // const vectorList = [];
-    // const vectorTypes = ['VECTOR', 'LINE', 'REGULAR_POLYGON', 'ELLIPSE', 'STAR'];
-
-
-
-    // let resp = await fetch(`${baseUrl}/v1/files/${fileKey}`, { headers });
-    // let data = await resp.json();
+  public async generate(result: any) { // result files request
+    const vectorList: any[] = [];
+    const vectorMap = {};
+    let responses;
     let data = result;
 
     const doc = data.document;
@@ -90,58 +63,76 @@ export class CodeGeneration {
     let html = '';
 
     for (let i = 0; i < canvas.children.length; i++) {
-      const child = canvas.children[i]
+      const child = canvas.children[i];
+
       if (child.name.charAt(0) === '#' && child.visible !== false) {
         const child = canvas.children[i];
-        this.preprocessTree(child);
+        this.preprocessTree(child, vectorList, vectorMap);
       }
     }
 
     let guids = vectorList.join(',');
-    data = await fetch(`${baseUrl}/v1/images/${fileKey}?ids=${guids}&format=svg`, { headers });
-    const imageJSON = await data.json();
+    let promises: unknown[] = [];
+    let images;
 
-    const images = imageJSON.images || {};
-    if (images) {
-      let promises = [];
-      let guids = [];
-      for (const guid in images) {
-        if (images[guid] == null) continue;
-        guids.push(guid);
-        promises.push(fetch(images[guid]));
-      }
+    this.api.get(ImagesRequest, guids)
+      .pipe(
+        switchMap((res) => {
+          data = res;
+          const imageJSON = data.json();
+          const images = imageJSON.images || {};
 
-      let responses = await Promise.all(promises);
-      promises = [];
-      for (const resp of responses) {
-        promises.push(resp.text());
-      }
+          if (images) {
+            let guids = [];
 
-      responses = await Promise.all(promises);
-      for (let i = 0; i < responses.length; i++) {
-        images[guids[i]] = responses[i].replace('<svg ', '<svg preserveAspectRatio="none" ');
-      }
-    }
+            for (const guid in images) {
 
-    const componentMap = {};
+              if (images[guid] == null) {
+                continue;
+              }
+              guids.push(guid);
+              this.api.get(ImageRequest, images[guid]).subscribe((res) => promises.push(res));
+            }
+            responses = promises;
+            promises = [];
+
+            for (const resp of responses) {
+              promises.push((resp as any).text());
+            }
+
+            responses = promises;
+
+            for (let i = 0; i < responses.length; i++) {
+              images[guids[i]] = (responses[i] as any).replace('<svg ', '<svg preserveAspectRatio="none" ');
+            }
+          }
+        }),
+        catchError((err) => this.errHandler(err))
+      );
+
+
+    const componentMap: any = {};
     let contents = `import { NgModule } from '@angular/core';\n`;
     contents += `import { FormsModule } from '@angular/forms';\n`;
     contents += `import { CommonModule } from '@angular/common';\n`;
     let nextSection = ``;
 
     for (let i = 0; i < canvas.children.length; i++) {
-      const child = canvas.children[i]
+      const child = canvas.children[i];
+
       if (child.name.charAt(0) === '#' && child.visible !== false) {
         const child = canvas.children[i];
         this.createComponent(child, images, componentMap);
       }
     }
 
-    const imported = {};
+    const imported: any = {};
     const components = [];
+
     for (const key in componentMap) {
       const component = componentMap[key];
       const name = component.name;
+
       if (!imported[name]) {
         contents += `import { ${name}Component } from './${name}.component';\n`;
         components.push(name + 'Component');
@@ -151,43 +142,71 @@ export class CodeGeneration {
     contents += "\n";
     contents += nextSection;
     nextSection = '';
-
     nextSection += '@NgModule({\n';
     nextSection += '  imports: [ CommonModule, FormsModule ],\n',
       nextSection += `  declarations: [ ${components.join(', ')} ],\n`
     nextSection += `  exports: [ ${components.join(', ')} ],\n`
     nextSection += `})\n`;
     nextSection += `export class FigmaModule { }`;
-
     contents += nextSection;
 
     const path = "./src/components/figma.module.ts";
-    fs.writeFile(path, contents, function (err) {
-      if (err) console.log(err);
+    fs.writeFile(path, contents, (err: any) => {
+
+      if (err) {
+        console.log(err);
+      }
       console.log(`wrote ${path}`);
     });
 
   }
 
-  private preprocessTree(node) {
+  private errHandler(err: any) {
+    console.log(err);
+    return err;
+  }
+
+  private preprocessTree(node: {
+    name: string;
+    fills: any;
+    strokes: any;
+    blendMode: string | null;
+    type: any;
+    children: any[];
+    constraints: {
+      vertical: any;
+      horizontal: any;
+    };
+    id: string | number;
+  }, vectorList: any[], vectorMap: any) {
     let vectorsOnly = node.name.charAt(0) !== '#';
     let vectorVConstraint = null;
     let vectorHConstraint = null;
 
     if (this.paintsRequireRender(node.fills)
-        || this.paintsRequireRender(node.strokes)
-        || (node.blendMode != null 
+      || this.paintsRequireRender(node.strokes)
+      || (node.blendMode != null
         && ['PASS_THROUGH', 'NORMAL'].indexOf(node.blendMode) < 0)) {
       node.type = 'VECTOR';
     }
-
     const children = node.children && node.children.filter((child) => child.visible !== false);
+
     if (children) {
+
       for (let j = 0; j < children.length; j++) {
-        if (vectorTypes.indexOf(children[j].type) < 0) vectorsOnly = false;
+
+        if (Object.values(Vectors).includes(children[j].type)) {
+          vectorsOnly = false;
+        }
         else {
-          if (vectorVConstraint != null && children[j].constraints.vertical != vectorVConstraint) vectorsOnly = false;
-          if (vectorHConstraint != null && children[j].constraints.horizontal != vectorHConstraint) vectorsOnly = false;
+          if (vectorVConstraint != null
+            && children[j].constraints.vertical != vectorVConstraint) {
+            vectorsOnly = false;
+          }
+          if (vectorHConstraint != null
+            && children[j].constraints.horizontal != vectorHConstraint) {
+            vectorsOnly = false;
+          }
           vectorVConstraint = children[j].constraints.vertical;
           vectorHConstraint = children[j].constraints.horizontal;
         }
@@ -203,7 +222,7 @@ export class CodeGeneration {
       };
     }
 
-    if (vectorTypes.indexOf(node.type) >= 0) {
+    if (Object.values(Vectors).includes(node.type)) {
       node.type = 'VECTOR';
       vectorMap[node.id] = node;
       vectorList.push(node.id);
@@ -212,40 +231,37 @@ export class CodeGeneration {
 
     if (node.children) {
       for (const child of node.children) {
-        this.preprocessTree(child);
+        this.preprocessTree(child, vectorList, vectorMap);
       }
     }
   }
 
-  private paintsRequireRender(paints) {
-    if (!paints) return false;
+  private paintsRequireRender(paints: any) {
+    if (!paints) { return false; }
 
     let numPaints = 0;
     for (const paint of paints) {
-      if (paint.visible === false) continue;
+      if (paint.visible === false) { continue; }
 
       numPaints++;
-      if (paint.type === 'EMOJI') return true;
+      if (paint.type === 'EMOJI') { return true; }
     }
 
     return numPaints > 1;
   }
 
-  private createComponent(component: any, _imgMap: any, componentMap: any) {
-
-
+  private createComponent(component: any, imgMap?: any, componentMap?: any) {
     const name = 'C' + component.name.replace(/\W+/g, '');
     const instance = name + component.id.replace(';', 'S').replace(':', 'D');
-
     let doc = '';
-
     const path = `src/components/${name}.component.ts`;
 
     if (!fs.existsSync(path)) {
       const componentSrc = `
-            import { Component, Input } from '@angular/core';
+          import { Component, Input } from '@angular/core';
           import { NodeTypes } from '../../core/api/figma/properties/enums.property-figma';
-import { DivParamMarkup } from '../../core/markup/div/div-param-markup';
+          import { DivParamMarkup } from '../../core/markup/div/div-param-markup';
+          import { take } from 'rxjs/operators';
 
             @Component({
               selector: 'app-${name}',
@@ -275,7 +291,7 @@ import { DivParamMarkup } from '../../core/markup/div/div-param-markup';
   private visitNode(node: { absoluteBoundingBox: any, children: [] },
     parent: Window | null | any,
     lastVertical: number | null,
-    _indent: any) {
+    indent?: any) {
 
     let minChildren: any[] = [];
     const maxChildren: any[] = [];
@@ -306,7 +322,7 @@ import { DivParamMarkup } from '../../core/markup/div/div-param-markup';
     const phPMp = {} as ParagraphParamMarkup;
     phPMp.fontSetStyle = this.fontStyle;
     const div = {} as DivParamMarkup;
-    
+
     if (node.order) {
       mockResult.bgParam.outerStyle.zIndex = node.order;
     }
@@ -392,5 +408,4 @@ import { DivParamMarkup } from '../../core/markup/div/div-param-markup';
     }
   }
 
-  // visitNode(node, parent, lastVertical, indent)
 }
