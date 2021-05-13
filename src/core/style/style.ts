@@ -1,10 +1,11 @@
+import { DeclarationStyle } from './declaration-style';
 import {
     ColorPropertyFigma,
     PaintPropertyFigma,
     EffectPropertyFigma
 } from "../api";
 
-export class Style extends CSSStyleDeclaration {
+export class Style extends DeclarationStyle {
 
     public colorToString(color: ColorPropertyFigma | any): string {
         return `rgba(${Math.round(color.r * 255)},

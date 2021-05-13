@@ -25,6 +25,11 @@ export enum NodeTypes {
     SLICE = 'SLICE'
 }
 
+export enum Groups {
+    GROUP = 'GROUP',
+    BOOLEAN_OPERATION = 'BOOLEAN_OPERATION'
+}
+
 export enum Vectors {
     VECTOR = 'VECTOR', 
     LINE = 'LINE', 

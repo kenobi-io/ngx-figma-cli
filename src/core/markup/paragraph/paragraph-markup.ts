@@ -92,3 +92,4 @@ export class ParagraphMarkup implements ParagraphSetMarkup {
                                        .map((line: any, idx: any) => `<div key="${idx}">${line}</div>`);
         }
     }
+}

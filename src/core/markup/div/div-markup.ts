@@ -135,7 +135,7 @@ export class DivMarkup implements DivSetMarkup {
 
             if (divPMp.content != null) {
                 if (divPMp.value.name.charAt(0) === '$') {
-                    const varName = divPMp.value.name.substring(1);
+                    // const varName = divPMp.value.name.substring(1);
                     for (const piece of divPMp.content) {
                         this.markup.print(piece, divPMp.indent + '        ');
                     }

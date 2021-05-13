@@ -1,5 +1,8 @@
 import { environment } from "../../../environments/index";
 import { InvokeRequest } from "./invoke.request";
+import { Headers } from 'node-fetch';
+import fetch from 'node-fetch';
+
 export class ImagesRequest<T> implements InvokeRequest<T> {
   public imagesUrl: string;
   public header: Headers;
@@ -14,7 +17,7 @@ export class ImagesRequest<T> implements InvokeRequest<T> {
     const param: string = `?ids=${guids}&format=svg`;
 
     return fetch(this.imagesUrl + param, { headers: this.header })
-        .then((response: Response) => {
+        .then((response) => {
             if (!response.ok) {
                 throw new Error(response.statusText);
             }

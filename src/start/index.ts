@@ -1,22 +1,21 @@
-import {strings } from '@angular-devkit/core';
+// import {strings } from '@angular-devkit/core';
 import {
   Rule,
   SchematicContext,
   Tree,
-  apply,
+  // apply,
   chain,
-  mergeWith,
+  // mergeWith,
   // template,
-  url,
+  // url,
   // move,
-  applyTemplates,
+  // applyTemplates,
 } from '@angular-devkit/schematics';
 import { take } from "rxjs/operators";
 import { config } from 'dotenv';
 import { CodeGeneration } from './code-generation/code-generation';
 import {
   FilesRequest,
-  // FileNodeFigma,
   RestApiService
 } from '../core';
 
@@ -32,12 +31,12 @@ export default function (options: any): Rule {
           cg.generate(result);
         });
     },
-    mergeWith(apply(url('./files/components'), [
-      applyTemplates({
-        dasherize: strings.dasherize,
-        INDEX: options.index
-      }),
-    ])),
+    // mergeWith(apply(url('./files/components'), [
+    //   applyTemplates({
+    //     dasherize: strings.dasherize,
+    //     INDEX: options.index
+    //   }),
+    // ])),
   ]);
   
   return rule;

@@ -24,12 +24,14 @@ import {
   RestApiService,
   ImagesRequest,
   ImageRequest,
-  Vectors
+  Vectors,
+  Groups,
+  LayoutConstraints,
+  LayoutParamStyle
 } from '../../core';
 
 export class CodeGeneration {
 
-  // private resolver: Resolver;
   private layoutStyle: LayoutSetStyle;
   private bgStyle: BackgroundSetStyle;
   private effectStyle: EffectSetStyle;
@@ -52,15 +54,13 @@ export class CodeGeneration {
     this.api = new RestApiService();
   }
 
-  public async generate(result: any) { // result files request
+  public generate(result: any): void { // result files request
     const vectorList: any[] = [];
     const vectorMap = {};
     let responses;
     let data = result;
-
     const doc = data.document;
     const canvas = doc.children[0];
-    let html = '';
 
     for (let i = 0; i < canvas.children.length; i++) {
       const child = canvas.children[i];
@@ -79,8 +79,8 @@ export class CodeGeneration {
       .pipe(
         switchMap((res) => {
           data = res;
-          const imageJSON = data.json();
-          const images = imageJSON.images || {};
+          const imageJSON = data;
+          images = imageJSON.images || {};
 
           if (images) {
             let guids = [];
@@ -106,11 +106,10 @@ export class CodeGeneration {
               images[guids[i]] = (responses[i] as any).replace('<svg ', '<svg preserveAspectRatio="none" ');
             }
           }
+          return data;
         }),
         catchError((err) => this.errHandler(err))
       );
-
-
     const componentMap: any = {};
     let contents = `import { NgModule } from '@angular/core';\n`;
     contents += `import { FormsModule } from '@angular/forms';\n`;
@@ -122,10 +121,9 @@ export class CodeGeneration {
 
       if (child.name.charAt(0) === '#' && child.visible !== false) {
         const child = canvas.children[i];
-        this.createComponent(child, images, componentMap);
+        this.createComponent(child, componentMap);
       }
     }
-
     const imported: any = {};
     const components = [];
 
@@ -143,16 +141,15 @@ export class CodeGeneration {
     contents += nextSection;
     nextSection = '';
     nextSection += '@NgModule({\n';
-    nextSection += '  imports: [ CommonModule, FormsModule ],\n',
-      nextSection += `  declarations: [ ${components.join(', ')} ],\n`
-    nextSection += `  exports: [ ${components.join(', ')} ],\n`
+    nextSection += '  imports: [ CommonModule, FormsModule ],\n';
+    nextSection += `  declarations: [ ${components.join(', ')} ],\n`;
+    nextSection += `  exports: [ ${components.join(', ')} ],\n`;
     nextSection += `})\n`;
     nextSection += `export class FigmaModule { }`;
     contents += nextSection;
-
     const path = "./src/components/figma.module.ts";
-    fs.writeFile(path, contents, (err: any) => {
 
+    fs.writeFile(path, contents, (err: any) => {
       if (err) {
         console.log(err);
       }
@@ -192,9 +189,7 @@ export class CodeGeneration {
     const children = node.children && node.children.filter((child) => child.visible !== false);
 
     if (children) {
-
       for (let j = 0; j < children.length; j++) {
-
         if (Object.values(Vectors).includes(children[j].type)) {
           vectorsOnly = false;
         }
@@ -236,59 +231,60 @@ export class CodeGeneration {
     }
   }
 
-  private paintsRequireRender(paints: any) {
-    if (!paints) { return false; }
+  private paintsRequireRender(paints: any): boolean {
 
+    if (!paints) {
+      return false;
+    }
     let numPaints = 0;
     for (const paint of paints) {
-      if (paint.visible === false) { continue; }
-
+      if (paint.visible === false) {
+        continue;
+      }
       numPaints++;
-      if (paint.type === 'EMOJI') { return true; }
+      if (paint.type === 'EMOJI') {
+        return true;
+      }
     }
 
     return numPaints > 1;
   }
 
-  private createComponent(component: any, imgMap?: any, componentMap?: any) {
+  private createComponent(component: any, componentMap: any) {
     const name = 'C' + component.name.replace(/\W+/g, '');
     const instance = name + component.id.replace(';', 'S').replace(':', 'D');
     let doc = '';
     const path = `src/components/${name}.component.ts`;
 
     if (!fs.existsSync(path)) {
+
       const componentSrc = `
           import { Component, Input } from '@angular/core';
-          import { NodeTypes } from '../../core/api/figma/properties/enums.property-figma';
-          import { DivParamMarkup } from '../../core/markup/div/div-param-markup';
-          import { take } from 'rxjs/operators';
+          import { throwError } from 'rxjs';
+          @Component({
+            selector: 'app-${name}',
+            templateUrl: '${name}.component.html',
+          })
+          export class ${name}Component  {
+            @Input() props: any;
+          }`;
 
-            @Component({
-              selector: 'app-${name}',
-              templateUrl: '${name}.component.html',
-            })
-            export class ${name}Component  {
-              @Input() props: any;
-            }
-            `;
-      fs.writeFile(path, componentSrc, function (err: any) {
-        if (err) console.log(err);
+      fs.writeFile(path, componentSrc, (err: any) => {
+        if (err) { console.log(err); }
         console.log(`wrote ${path}`);
       });
     }
-
-
     this.visitNode(component, null, null, '  ');
-
     const htmPath = `src/components/${name}.component.html`;
-    fs.writeFile(htmPath, doc, function (err: any) {
+
+    fs.writeFile(htmPath, doc, (err: any) => {
       if (err) console.log(err);
       console.log(`wrote ${htmPath}`);
     });
     componentMap[component.id] = { instance, name, doc };
   }
 
-  private visitNode(node: { absoluteBoundingBox: any, children: [] },
+  private visitNode(node: any,
     parent: Window | null | any,
     lastVertical: number | null,
     indent?: any) {
@@ -296,8 +292,9 @@ export class CodeGeneration {
     let minChildren: any[] = [];
     const maxChildren: any[] = [];
     const centerChildren: any[] = [];
-    let bounds = null;
-    let nodeBounds = null;
+    let bounds: Partial<Style>;
+    const bgParam: LayoutParamStyle  = {} as LayoutParamStyle;
+    let nodeBounds = null
 
     if (parent != null) {
       nodeBounds = node.absoluteBoundingBox;
@@ -308,30 +305,38 @@ export class CodeGeneration {
       const py = parentBounds.y;
 
       bounds = {
-        left: nodeBounds.x - px,
-        right: px + parentBounds.width - nx2,
-        top: lastVertical == null ? nodeBounds.y - py : nodeBounds.y - lastVertical,
-        bottom: py + parentBounds.height - ny2,
+        left:  `${nodeBounds.x - px}`,
+        right: `${px + parentBounds.width - nx2}`,
+        top: lastVertical == null ? `${nodeBounds.y - py}` : `${nodeBounds.y - lastVertical}`,
+        bottom: `${py + parentBounds.height - ny2}`,
         width: nodeBounds.width,
         height: nodeBounds.height,
       }
+
+      bgParam.value = bounds as Style;
     }
 
     this.expandChildren(node, parent, minChildren, maxChildren, centerChildren, 0);
-
+    
     const phPMp = {} as ParagraphParamMarkup;
     phPMp.fontSetStyle = this.fontStyle;
     const div = {} as DivParamMarkup;
-
+    div.indent = indent;
+    div.outerClass = 'outerDiv';
+    bgParam.outerClass = 'outerDiv';
+    bgParam.outerStyle = {} as Style;
+    div.innerClass = 'innerDiv';
+    
     if (node.order) {
-      mockResult.bgParam.outerStyle.zIndex = node.order;
+      bgParam.outerStyle.zIndex = node.order;
     }
+
     const cHorizontal = node.constraints && node.constraints.horizontal;
     const cVertical = node.constraints && node.constraints.vertical;
-    mockResult.bgParam.isVertical = false;
-    this.layoutStyle.set(cHorizontal, mockResult.bgParam)
-    mockResult.bgParam.isVertical = true;
-    this.layoutStyle.set(cVertical, mockResult.bgParam);
+    bgParam.isVertical = false;
+    this.layoutStyle.set(cHorizontal, bgParam)
+    bgParam.isVertical = true;
+    this.layoutStyle.set(cVertical, bgParam);
 
     this.bgStyle.set(node.type, { value: node });
     for (let effect of node.effects) {
@@ -349,24 +354,24 @@ export class CodeGeneration {
     maxChildren: any[],
     centerChildren: any[],
     offset: number) {
+
     const children = node.children;
     let added = offset;
 
     if (children) {
+
       for (let i = 0; i < children.length; i++) {
         const child = children[i];
 
-        if (parent != null
-          && (node.type === 'COMPONENT'
-            || node.type === 'INSTANCE')) {
+        if (parent != null 
+            && (node.type === NodeTypes.COMPONENT || node.type === NodeTypes.INSTANCE)) {
           child.constraints = {
-            vertical: 'TOP_BOTTOM',
-            horizontal: 'LEFT_RIGHT'
+            vertical: LayoutConstraints.TOP_BOTTOM,
+            horizontal: LayoutConstraints.LEFT_RIGHT
           };
         }
 
-        if (NodeTypes.GROUP === child.type
-          || NodeTypes.BOOLEAN_OPERATION === child.type) {
+        if (Object.values(Groups).includes(child.type)) {
           added += this.expandChildren(child,
             parent,
             minChildren,
@@ -375,20 +380,18 @@ export class CodeGeneration {
             added + i);
           continue;
         }
-
         child.order = i + added;
 
         if (child.constraints
-          && child.constraints.vertical === 'BOTTOM') {
+            && child.constraints.vertical === LayoutConstraints.BOTTOM) {
           maxChildren.push(child);
         } else if (child.constraints
-          && child.constraints.vertical === 'TOP') {
+                   && child.constraints.vertical === LayoutConstraints.TOP) {
           minChildren.push(child);
         } else {
           centerChildren.push(child);
         }
       }
-
       minChildren.sort(this.nodeSort);
       maxChildren.sort(this.nodeSort);
 
