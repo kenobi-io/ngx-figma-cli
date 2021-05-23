@@ -18,8 +18,9 @@ import {
   FilesRequest,
   RestApiService
 } from '../core';
+import { Schema } from './schema';
 
-export default function (options: any): Rule {
+export default function (options: Schema): Rule {
   const rule = chain([
     (_tree: Tree, context: SchematicContext) => {
       config();
@@ -28,7 +29,7 @@ export default function (options: any): Rule {
         .pipe(take(1))
         .subscribe((result: any) => {
           const cg = new CodeGeneration();
-          cg.generate(result);
+          cg.generate(result, cg);
         });
     },
     // mergeWith(apply(url('./files/components'), [

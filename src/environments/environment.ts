@@ -4,7 +4,7 @@
 
 export const environment = {
   production: true,
-  fileKey: process.env.FILE_KEY || 'AK8NkbH7rEJtoUSRgCjV3N',
+  fileKey: process.env.FILE_KEY || 'SRsKstDfn3iG9utOcS0YY6',
   token: process.env.DEV_TOKEN || '160268-d475cd95-efa0-4894-90ae-ec159f5383b2',
   url: 'https://api.figma.com',
   versionFile: 'v1/files',

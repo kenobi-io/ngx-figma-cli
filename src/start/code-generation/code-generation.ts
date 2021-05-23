@@ -1,4 +1,6 @@
-import { switchMap, catchError } from 'rxjs/operators';
+import { map, catchError, mergeMap, concatMap } from 'rxjs/operators';
+import { of, forkJoin } from 'rxjs';
+import fetch from 'node-fetch';
 import * as fs from "fs";
 
 import {
@@ -54,17 +56,18 @@ export class CodeGeneration {
     this.api = new RestApiService();
   }
 
-  public generate(result: any): void { // result files request
+  public generate(result: any, codeGen?: CodeGeneration): void { // result files request
     const vectorList: any[] = [];
     const vectorMap = {};
     let responses;
     let data = result;
     const doc = data.document;
     const canvas = doc.children[0];
-
+    const div = {} as DivParamMarkup;
+    div.codeGen = codeGen;
     for (let i = 0; i < canvas.children.length; i++) {
       const child = canvas.children[i];
-
+      console.log(`name is ${child.name} and id: `, child.id);
       if (child.name.charAt(0) === '#' && child.visible !== false) {
         const child = canvas.children[i];
         this.preprocessTree(child, vectorList, vectorMap);
@@ -77,11 +80,12 @@ export class CodeGeneration {
 
     this.api.get(ImagesRequest, guids)
       .pipe(
-        switchMap((res) => {
+        concatMap(async (res) => {
           data = res;
+          // const imageRes = []
           const imageJSON = data;
           images = imageJSON.images || {};
-
+          console.log('ImagesRequest images:', images);
           if (images) {
             let guids = [];
 
@@ -90,72 +94,75 @@ export class CodeGeneration {
               if (images[guid] == null) {
                 continue;
               }
+              console.log('guid: ', guid);
               guids.push(guid);
-              this.api.get(ImageRequest, images[guid]).subscribe((res) => promises.push(res));
-            }
-            responses = promises;
-            promises = [];
-
-            for (const resp of responses) {
-              promises.push((resp as any).text());
-            }
-
-            responses = promises;
-
-            for (let i = 0; i < responses.length; i++) {
-              images[guids[i]] = (responses[i] as any).replace('<svg ', '<svg preserveAspectRatio="none" ');
+              const re = await this.api.get(ImageRequest, images[guid]).toPromise();
+              promises.push(re);
             }
           }
-          return data;
+          responses = promises;
+          promises = [];
+
+          for (const resp of responses) {
+            promises.push((resp as any).text());
+          }
+
+          responses = promises;
+
+          for (let i = 0; i < responses.length; i++) {
+            images[guids[i]] = responses[i].toString().replace('<svg ', '<svg preserveAspectRatio="none" ');
+          }
+          return of(images);
         }),
         catchError((err) => this.errHandler(err))
-      );
-    const componentMap: any = {};
-    let contents = `import { NgModule } from '@angular/core';\n`;
-    contents += `import { FormsModule } from '@angular/forms';\n`;
-    contents += `import { CommonModule } from '@angular/common';\n`;
-    let nextSection = ``;
+      ).subscribe((images: []) => {
+        const componentMap: any = {};
+        let contents = `import { NgModule } from '@angular/core';\n`;
+        contents += `import { FormsModule } from '@angular/forms';\n`;
+        contents += `import { CommonModule } from '@angular/common';\n`;
+        let nextSection = ``;
+        div.imgMap = images;
+        for (let i = 0; i < canvas.children.length; i++) {
+          const child = canvas.children[i];
 
-    for (let i = 0; i < canvas.children.length; i++) {
-      const child = canvas.children[i];
+          if (child.name.charAt(0) === '#' && child.visible !== false) {
+            const child = canvas.children[i];
+            this.createComponent(child, images, componentMap, div);
+          }
+        }
+        const imported: any = {};
+        const components = [];
 
-      if (child.name.charAt(0) === '#' && child.visible !== false) {
-        const child = canvas.children[i];
-        this.createComponent(child, componentMap);
-      }
-    }
-    const imported: any = {};
-    const components = [];
+        for (const key in componentMap) {
+          const component = componentMap[key];
+          const name = component.name;
 
-    for (const key in componentMap) {
-      const component = componentMap[key];
-      const name = component.name;
+          if (!imported[name]) {
+            contents += `import { ${name}Component } from './${name}.component';\n`;
+            components.push(name + 'Component');
+          }
+          imported[name] = true;
+        }
+        contents += "\n";
+        contents += nextSection;
+        nextSection = '';
+        nextSection += '@NgModule({\n';
+        nextSection += '  imports: [ CommonModule, FormsModule ],\n';
+        nextSection += `  declarations: [ ${components.join(', ')} ],\n`;
+        nextSection += `  exports: [ ${components.join(', ')} ],\n`;
+        nextSection += `})\n`;
+        nextSection += `export class FigmaModule { }`;
+        contents += nextSection;
+        const path = "./src/components/figma.module.ts";
 
-      if (!imported[name]) {
-        contents += `import { ${name}Component } from './${name}.component';\n`;
-        components.push(name + 'Component');
-      }
-      imported[name] = true;
-    }
-    contents += "\n";
-    contents += nextSection;
-    nextSection = '';
-    nextSection += '@NgModule({\n';
-    nextSection += '  imports: [ CommonModule, FormsModule ],\n';
-    nextSection += `  declarations: [ ${components.join(', ')} ],\n`;
-    nextSection += `  exports: [ ${components.join(', ')} ],\n`;
-    nextSection += `})\n`;
-    nextSection += `export class FigmaModule { }`;
-    contents += nextSection;
-    const path = "./src/components/figma.module.ts";
-
-    fs.writeFile(path, contents, (err: any) => {
-      if (err) {
-        console.log(err);
-      }
-      console.log(`wrote ${path}`);
-    });
-
+        // TODO: if file './src/components/figma.module.ts' does't exists.
+        fs.writeFile(path, contents, (err: any) => {
+          if (err) {
+            console.log(err);
+          }
+          console.log(`wrote ${path}`);
+        });
+      });
   }
 
   private errHandler(err: any) {
@@ -250,50 +257,54 @@ export class CodeGeneration {
     return numPaints > 1;
   }
 
-  private createComponent(component: any, componentMap: any) {
+  public createComponent(component: any, imagesMap: any, componentMap: any, div?: DivParamMarkup) {
     const name = 'C' + component.name.replace(/\W+/g, '');
     const instance = name + component.id.replace(';', 'S').replace(':', 'D');
-    let doc = '';
     const path = `src/components/${name}.component.ts`;
 
     if (!fs.existsSync(path)) {
 
       const componentSrc = `
-          import { Component, Input } from '@angular/core';
-          import { throwError } from 'rxjs';
-          @Component({
-            selector: 'app-${name}',
-            templateUrl: '${name}.component.html',
-          })
-          export class ${name}Component  {
-            @Input() props: any;
-          }`;
+      import { Component, Input } from '@angular/core';
+      @Component({
+        selector: 'app-${name}',
+        templateUrl: '${name}.component.html',
+      })
+      export class ${name}Component  {
+        @Input() props: any;
+      }`;
 
       fs.writeFile(path, componentSrc, (err: any) => {
         if (err) { console.log(err); }
         console.log(`wrote ${path}`);
       });
     }
-    this.visitNode(component, null, null, '  ');
-    const htmPath = `src/components/${name}.component.html`;
 
-    fs.writeFile(htmPath, doc, (err: any) => {
+    div.imgMap = imagesMap;
+
+    this.visitNode(component, null, null, '  ', div);
+
+    const htmPath = `src/components/${name}.component.html`;
+    fs.writeFile(htmPath, this.divSetMarkup.markup.document, (err: any) => {
       if (err) console.log(err);
       console.log(`wrote ${htmPath}`);
     });
-    componentMap[component.id] = { instance, name, doc };
+    componentMap[component.id] = { instance, name, doc: this.divSetMarkup.markup.document };
   }
 
-  private visitNode(node: any,
+  public visitNode(node: any,
     parent: Window | null | any,
     lastVertical: number | null,
-    indent?: any) {
+    indent?: any,
+    div?: DivParamMarkup) {
 
-    let minChildren: any[] = [];
-    const maxChildren: any[] = [];
-    const centerChildren: any[] = [];
+    let content = null;
+    const styles = {};
+    let minChildren: [] = [];
+    const maxChildren: [] = [];
+    const centerChildren: [] = [];
     let bounds: Partial<Style>;
-    const bgParam: LayoutParamStyle  = {} as LayoutParamStyle;
+    const bgParam: LayoutParamStyle = {} as LayoutParamStyle;
     let nodeBounds = null
 
     if (parent != null) {
@@ -301,14 +312,14 @@ export class CodeGeneration {
       const nx2 = nodeBounds.x + nodeBounds.width;
       const ny2 = nodeBounds.y + nodeBounds.height;
       const parentBounds = parent.absoluteBoundingBox;
-      const px = parentBounds.x;
-      const py = parentBounds.y;
+      const px = parentBounds?.x;
+      const py = parentBounds?.y;
 
       bounds = {
-        left:  `${nodeBounds.x - px}`,
-        right: `${px + parentBounds.width - nx2}`,
+        left: `${nodeBounds.x - px}`,
+        right: `${px + parentBounds?.width - nx2}`,
         top: lastVertical == null ? `${nodeBounds.y - py}` : `${nodeBounds.y - lastVertical}`,
-        bottom: `${py + parentBounds.height - ny2}`,
+        bottom: `${py + parentBounds?.height - ny2}`,
         width: nodeBounds.width,
         height: nodeBounds.height,
       }
@@ -317,16 +328,23 @@ export class CodeGeneration {
     }
 
     this.expandChildren(node, parent, minChildren, maxChildren, centerChildren, 0);
-    
+
     const phPMp = {} as ParagraphParamMarkup;
+    phPMp.content = content;
     phPMp.fontSetStyle = this.fontStyle;
-    const div = {} as DivParamMarkup;
+
+    div.value = {};
+    div.value.id = node.id;
+    div.component = node;
     div.indent = indent;
+    div.minChildren = minChildren;
+    div.centerChildren = centerChildren;
+    div.maxChildren = maxChildren;
     div.outerClass = 'outerDiv';
     bgParam.outerClass = 'outerDiv';
     bgParam.outerStyle = {} as Style;
     div.innerClass = 'innerDiv';
-    
+
     if (node.order) {
       bgParam.outerStyle.zIndex = node.order;
     }
@@ -363,8 +381,8 @@ export class CodeGeneration {
       for (let i = 0; i < children.length; i++) {
         const child = children[i];
 
-        if (parent != null 
-            && (node.type === NodeTypes.COMPONENT || node.type === NodeTypes.INSTANCE)) {
+        if (parent != null
+          && (node.type === NodeTypes.COMPONENT || node.type === NodeTypes.INSTANCE)) {
           child.constraints = {
             vertical: LayoutConstraints.TOP_BOTTOM,
             horizontal: LayoutConstraints.LEFT_RIGHT
@@ -383,10 +401,10 @@ export class CodeGeneration {
         child.order = i + added;
 
         if (child.constraints
-            && child.constraints.vertical === LayoutConstraints.BOTTOM) {
+          && child.constraints.vertical === LayoutConstraints.BOTTOM) {
           maxChildren.push(child);
         } else if (child.constraints
-                   && child.constraints.vertical === LayoutConstraints.TOP) {
+          && child.constraints.vertical === LayoutConstraints.TOP) {
           minChildren.push(child);
         } else {
           centerChildren.push(child);

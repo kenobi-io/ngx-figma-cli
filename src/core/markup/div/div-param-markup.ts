@@ -1,4 +1,5 @@
 import { ParamMarkup } from '../param-markup';
+import { CodeGeneration } from '../../../start/code-generation/code-generation';
 
 export interface DivParamMarkup extends ParamMarkup {
     component: any;
@@ -13,8 +14,7 @@ export interface DivParamMarkup extends ParamMarkup {
     minChildren: [];
     centerChildren: [];
     content: [];
-    createComponent: Function;
-    visitNode: Function;
+    codeGen: CodeGeneration;
     imgMap: [];
     componentMap: [];
 }

@@ -5,25 +5,24 @@ import { Style } from '../style';
 export class FontStyle implements FontSetStyle {
 
     public style: Partial<Style>;
-    private fontMap: Map<NodeTypes, Function>;
+    private fontMap: Map<NodeTypes, string>;
 
-    constructor(style: Partial<Style>) {
+    constructor(style: Partial<Style>, fontMap?: Map<NodeTypes, string>) {
         this.style = style;
-        this.font();
+        this.fontMap = fontMap ? fontMap : this.font();
     }
 
     public set(nodeTypeEnum: NodeTypes, fontParamStyle: FontParamStyle): void {
-        if (nodeTypeEnum) {
-            const func = this.fontMap.get(nodeTypeEnum);
-            func && func(fontParamStyle);
-        }
+        const key = this.fontMap.get(nodeTypeEnum);
+        key && this[key](fontParamStyle);
     }
 
     private font() {
-        this.fontMap = new Map();
-        this.fontMap.set(NodeTypes.TEXT, this.text);
+        const fontMap = new Map();
+        fontMap.set(NodeTypes.TEXT, 'text');
+        return fontMap;
     }
-    
+
     public text(pf: FontParamStyle) {
         this.style.fontSize = pf.value.fontSize + 'px';
         this.style.fontWeight = `${pf.value.fontWeight}px`;

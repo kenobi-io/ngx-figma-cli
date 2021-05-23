@@ -1,6 +1,6 @@
 import { environment } from "../../../environments/index";
 import { InvokeRequest } from "./invoke.request";
-import { Headers } from 'node-fetch';
+import { Headers, Response } from 'node-fetch';
 import fetch from 'node-fetch';
 
 export class FilesRequest<T> implements InvokeRequest<T> {
@@ -17,8 +17,9 @@ export class FilesRequest<T> implements InvokeRequest<T> {
     public fetch(_param?: any): Promise<T> {
         
         return fetch(this.filesUrl, { headers: this.header })
-            .then((response) => {
+            .then((response: Response) => {
                 if (!response.ok) {
+
                     throw new Error(response.statusText);
                 }
                 return response.json();

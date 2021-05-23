@@ -1,22 +1,16 @@
 import { InvokeRequest } from "./invoke.request";
-// import { Headers } from 'node-fetch';
+import { Response } from 'node-fetch';
 import fetch from 'node-fetch';
 
-export class ImageRequest<T> implements InvokeRequest<T> {
-    // public header: Headers;
-
-    // constructor() {
-    //     this.header = new Headers();
-    //     this.header.append('X-Figma-Token', environment.token);
-    // }
-    public fetch(url: string): Promise<T> {
+export class ImageRequest implements InvokeRequest<Response> {
+    public fetch(url: string): Promise<Response> {
         
         return fetch(url)
             .then((response) => {
                 if (!response.ok) {
                     throw new Error(response.statusText);
                 }
-                return response.json();
+                return response;
             })
             .catch((error: Error) => {
                 console.error(error);

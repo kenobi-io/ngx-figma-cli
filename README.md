@@ -6,3 +6,5 @@ cli for generating template (html + css) from figma api
 npm run build
 schematics .:start\
 ```
+
+# change log

@@ -6,44 +6,37 @@ import { Style } from '../style';
 export class EffectStyle implements EffectSetStyle {
 
     public style: Partial<Style>;
-    private effectsMap: Map<Effects, Function>;
+    private effectsMap: Map<Effects, string>;
 
-    constructor(style: Partial<Style>) {
+    constructor(style: Partial<Style>, effectsMap?: Map<Effects, string>) {
         this.style = style;
-        this.effects();
+        this.effectsMap = effectsMap ? effectsMap : this.effects();
     }
 
 
     public set(effectEnum: Effects, effectParamStyle: EffectParamStyle): void {
-        if(effectEnum) {
-            const func = this.effectsMap.get(effectEnum);  
-            func && func(effectParamStyle);
-        }
+        const key = this.effectsMap.get(effectEnum);
+        key && this[key](effectParamStyle);
     }
 
-    private effects() {
-        this.effectsMap = new Map();
-        this.effectsMap.set(Effects.DROP_SHADOW, this.dropShadowEffect);
-        this.effectsMap.set(Effects.INNER_SHADOW, this.innerShadowEffect);
-        this.effectsMap.set(Effects.LAYER_BLUR, this.layerBlurEffect);
+    private effects(): Map<Effects, string> {
+        const effectsMap = new Map();
+        effectsMap.set(Effects.DROP_SHADOW, 'dropShadowEffect');
+        effectsMap.set(Effects.INNER_SHADOW, 'innerShadowEffect');
+        effectsMap.set(Effects.LAYER_BLUR, 'layerBlurEffect');
+        return effectsMap;
     }
 
     private dropShadowEffect(pe: EffectParamStyle) {
-        if (this.style.dropShadow) {
-            this.style.boxShadow = this.style.dropShadow(pe.value);
-        }
+        this.style.boxShadow = this.style.dropShadow(pe.value);
     }
 
     private innerShadowEffect(pe: EffectParamStyle) {
-        if (this.style.innerShadow) {
-            this.style.boxShadow = this.style.innerShadow(pe.value);
-        }
+        this.style.boxShadow = this.style.innerShadow(pe.value);
     }
 
     private layerBlurEffect(pe: EffectParamStyle) {
-        if (this.style.innerShadow) {
-            this.style.filter = `blur(${pe.value.radius}px)`;
-        }
+        this.style.filter = `blur(${pe.value.radius}px)`;
     }
-     
+
 }

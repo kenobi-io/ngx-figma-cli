@@ -6,38 +6,41 @@ import { Markup } from '../markup';
 export class ParagraphMarkup implements ParagraphSetMarkup {
 
     public markup: Partial<Markup>;
-    private phMap: Map<NodeTypes, Function>;
+    private phMap: Map<NodeTypes, string>;
 
-    constructor(markup: Partial<Markup>) {
+    constructor(markup: Partial<Markup>, phMap?: Map<NodeTypes, string>) {
         this.markup = markup;
-        this.paragraph();
+        this.phMap = phMap ? phMap : this.paragraph();
     }
 
-    public set(bgEnum: NodeTypes,
-               phParamMarkup: ParagraphParamMarkup): void {
-        const func = this.phMap.get(bgEnum);
-        func && func(phParamMarkup);
+    public set(bgEnum: NodeTypes, phParamMarkup: ParagraphParamMarkup): void {
+        const key = this.phMap.get(bgEnum);
+        key && this[key](phParamMarkup);
     }
 
-    private paragraph() {
-        this.phMap = new Map();
-        this.phMap.set(NodeTypes.TEXT, this.text);
+    private paragraph(): Map<NodeTypes, string> {
+        const phMap = new Map();
+        phMap.set(NodeTypes.TEXT, 'text');
+        return phMap;
     }
 
     private commit(key: any, phPMp: ParagraphParamMarkup): void {
-        if (phPMp && phPMp.para !== '') {
+
+        if (phPMp.para !== '') {
+
             if (phPMp.styleCache[phPMp.currStyle] == null && phPMp.currStyle !== 0) {
                 phPMp.styleCache[phPMp.currStyle] = {};
                 phPMp?.fontSetStyle.set(phPMp.styleCache[phPMp.currStyle],
                     phPMp.value.styleOverrideTable[phPMp.currStyle]);
             }
-
             const styleOverride = phPMp.styleCache[phPMp.currStyle] ?
                 JSON.stringify(phPMp.styleCache[phPMp.currStyle]) : '{}';
             let varName;
+
             if (phPMp.value.name.charAt(0) === '$') {
                 varName = phPMp.value.name.substring(1);
             }
+
             if (varName) {
                 phPMp.para = `
                     <ng-container *ngIf="props?.${varName}">{{props.${varName}}}</ng-container>
@@ -52,13 +55,11 @@ export class ParagraphMarkup implements ParagraphSetMarkup {
     private text(phPMp: ParagraphParamMarkup) {
 
         if (phPMp.value.name.substring(0, 6) === 'input:') {
-
             phPMp.content = [`<input key="${phPMp.value.id}"` +
                              `type="text" placeholder="${phPMp.value.characters}"` +
                              ` name="${phPMp.value.name.substring(7)}" />`];
 
         } else if (phPMp.value.characterStyleOverrides) {
-
             phPMp.para = '';
             phPMp.ps = [];
             phPMp.styleCache = {};
@@ -76,15 +77,14 @@ export class ParagraphMarkup implements ParagraphSetMarkup {
                 if (idx == null) {
                     idx = 0;
                 }
+
                 if (idx !== phPMp.currStyle) {
                     this.commit(i, phPMp);
                     phPMp.currStyle = idx;
                 }
-
                 phPMp.para += phPMp.value.characters[i];
             }
             this.commit('end', phPMp);
-
             phPMp.content = phPMp.ps;
         } else {
             phPMp.content = phPMp.value.characters

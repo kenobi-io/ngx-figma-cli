@@ -14,98 +14,77 @@ import { BackgroundSetStyle } from "./bg-set-style";
 export class BackgroundStyle implements BackgroundSetStyle {
 
     public style: Partial<Style>;
-    private bgsMap: Map<TypePaints | NodeTypes, Function>;
+    private bgsMap: Map<TypePaints | NodeTypes, string>;
 
-    constructor(style: Partial<Style>) {
+    constructor(style: Partial<Style>, bgsMap?: Map<TypePaints | NodeTypes, string>) {
         this.style = style;
-        this.bg();
+        this.bgsMap = bgsMap ? bgsMap : this.bg();
     }
 
-    public set(bgEnum: TypePaints | NodeTypes, 
-               bgParamStyle: BackgroundParamStyle): void {
-        const func = this.bgsMap.get(bgEnum);
-        func && func(bgParamStyle);
+    public set(bgEnum: TypePaints | NodeTypes,
+        bgParamStyle: BackgroundParamStyle): void {
+        const key: string = this.bgsMap.get(bgEnum);
+        key && this[key](bgParamStyle);
     }
 
-    private bg() {
-        this.bgsMap = new Map();
-        this.bgsMap.set(TypePaints.IMAGE,
-            this.image);
-        this.bgsMap.set(TypePaints.SOLID,
-            this.solid);
-        this.bgsMap.set(TypePaints.GRADIENT_LINEAR,
-            this.linearGradient);
-        this.bgsMap.set(TypePaints.GRADIENT_RADIAL,
-            this.radialGradient);
-            
-        this.bgsMap.set(NodeTypes.FRAME,
-            this.fraComInst);
-        this.bgsMap.set(NodeTypes.COMPONENT,
-            this.fraComInst);
-        this.bgsMap.set(NodeTypes.INSTANCE,
-            this.fraComInst);
-        this.bgsMap.set(NodeTypes.TEXT,
-            this.text);
+    private bg(): Map<TypePaints | NodeTypes, string> {
+        const bgsMap = new Map();
+        bgsMap.set(TypePaints.IMAGE, 'image');
+        bgsMap.set(TypePaints.SOLID, 'solid');
+        bgsMap.set(TypePaints.GRADIENT_LINEAR, 'linearGradient');
+        bgsMap.set(TypePaints.GRADIENT_RADIAL, 'radialGradient');
+        bgsMap.set(NodeTypes.FRAME, 'fraComInst');
+        bgsMap.set(NodeTypes.COMPONENT, 'fraComInst');
+        bgsMap.set(NodeTypes.INSTANCE, 'fraComInst');
+        bgsMap.set(NodeTypes.TEXT, 'text');
+        return bgsMap;
     }
 
     private image(bgP: BackgroundParamStyle) {
-        if (this.style.imageUrl && this.style.lastPaint) {
-            const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
-            if (lastFill) {
-                this.style.backgroundImage = this.style.imageUrl(lastFill.imageRef);
-                if (lastFill.scaleMode === 'FILL') {
-                    this.style.backgroundSize = 'cover';
-                } else {
-                    this.style.backgroundSize = undefined;
-                }
+        const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+        if (lastFill) {
+            this.style.backgroundImage = this.style.imageUrl(lastFill.imageRef);
+            if (lastFill.scaleMode === 'FILL') {
+                this.style.backgroundSize = 'cover';
+            } else {
+                this.style.backgroundSize = undefined;
             }
         }
     }
 
     private solid(bgP: BackgroundParamStyle) {
-        if (this.style.colorToString && this.style.lastPaint) {
-            const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
-            if (lastFill) {
-                this.style.backgroundColor = this.style.colorToString(lastFill.color);
-                this.style.opacity = `${lastFill.opacity}`;
-            }
+        const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+        if (lastFill) {
+            this.style.backgroundColor = this.style.colorToString(lastFill.color);
+            this.style.opacity = `${lastFill.opacity}`;
         }
     }
 
     private linearGradient(bgP: BackgroundParamStyle) {
-        if (this.style.paintToLinearGradient && this.style.lastPaint) {
-            const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
-            if (lastFill) {
-                this.style.background = this.style.paintToLinearGradient(lastFill);
-            }
+        const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+        if (lastFill) {
+            this.style.background = this.style.paintToLinearGradient(lastFill);
         }
     }
 
     private radialGradient(bgP: BackgroundParamStyle) {
-        if (this.style.paintToRadialGradient && this.style.lastPaint) {
-            const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
-            if (lastFill) {
-                this.style.background = this.style.paintToRadialGradient(lastFill);
-            }
+        const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+        if (lastFill) {
+            this.style.background = this.style.paintToRadialGradient(lastFill);
         }
     }
 
     private fraComInst(bgP: BackgroundParamStyle) {
-
-        if (this.style.colorToString) {
-            this.style.backgroundColor = this.style.colorToString((bgP.value as FrameFigma).backgroundColor);
-        }
+        this.style.backgroundColor = this.style.colorToString((bgP.value as FrameFigma).backgroundColor);
         if ((bgP.value as FrameFigma).clipsContent) {
             this.style.overflow = 'hidden';
         }
     }
 
     private text(bgP: BackgroundParamStyle) {
-        if (this.style.colorToString && this.style.lastPaint) {
-            const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
-            if (lastFill) {
-                this.style.color = this.style.colorToString(lastFill.color);
-            }
+        const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+        if (lastFill) {
+            this.style.color = this.style.colorToString(lastFill.color);
         }
     }
 }
