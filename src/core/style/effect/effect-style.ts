@@ -1,42 +1,44 @@
-import { EffectSetStyle } from './effect-set-style';
-import { EffectParamStyle } from './effect-param-style';
-import { Effects } from '../../api';
-import { Style } from '../style';
+import { EffectSetStyle } from "./effect-set-style";
+import { EffectParamStyle } from "./effect-param-style";
+import { Effects } from "../../api";
+import { Style } from "../style";
+import { InnerArrow } from "src/core/inner-arrow";
 
 export class EffectStyle implements EffectSetStyle {
+  public style: Partial<Style>;
+  private effectsMap: Map<Effects, InnerArrow>;
 
-    public style: Partial<Style>;
-    private effectsMap: Map<Effects, string>;
+  constructor(style: Partial<Style>, effectsMap?: Map<Effects, InnerArrow>) {
+    this.style = style;
+    this.effectsMap = effectsMap ? effectsMap : this.effects();
+  }
 
-    constructor(style: Partial<Style>, effectsMap?: Map<Effects, string>) {
-        this.style = style;
-        this.effectsMap = effectsMap ? effectsMap : this.effects();
-    }
+  public invoke(effectEnum: Effects, effectParamStyle: EffectParamStyle): void {
+    this.effectsMap.get(effectEnum).call(this, effectParamStyle);
+  }
 
+  private effects(): Map<Effects, InnerArrow> {
+    return new Map()
+      .set(Effects.DROP_SHADOW, (param: EffectParamStyle) =>
+        this.dropShadowEffect(param)
+      )
+      .set(Effects.INNER_SHADOW, (param: EffectParamStyle) =>
+        this.innerShadowEffect(param)
+      )
+      .set(Effects.LAYER_BLUR, (param: EffectParamStyle) =>
+        this.layerBlurEffect(param)
+      );
+  }
 
-    public set(effectEnum: Effects, effectParamStyle: EffectParamStyle): void {
-        const key = this.effectsMap.get(effectEnum);
-        key && this[key](effectParamStyle);
-    }
+  private dropShadowEffect(pe: EffectParamStyle) {
+    this.style.boxShadow = this.style.dropShadow(pe.value);
+  }
 
-    private effects(): Map<Effects, string> {
-        const effectsMap = new Map();
-        effectsMap.set(Effects.DROP_SHADOW, 'dropShadowEffect');
-        effectsMap.set(Effects.INNER_SHADOW, 'innerShadowEffect');
-        effectsMap.set(Effects.LAYER_BLUR, 'layerBlurEffect');
-        return effectsMap;
-    }
+  private innerShadowEffect(pe: EffectParamStyle) {
+    this.style.boxShadow = this.style.innerShadow(pe.value);
+  }
 
-    private dropShadowEffect(pe: EffectParamStyle) {
-        this.style.boxShadow = this.style.dropShadow(pe.value);
-    }
-
-    private innerShadowEffect(pe: EffectParamStyle) {
-        this.style.boxShadow = this.style.innerShadow(pe.value);
-    }
-
-    private layerBlurEffect(pe: EffectParamStyle) {
-        this.style.filter = `blur(${pe.value.radius}px)`;
-    }
-
+  private layerBlurEffect(pe: EffectParamStyle) {
+    this.style.filter = `blur(${pe.value.radius}px)`;
+  }
 }

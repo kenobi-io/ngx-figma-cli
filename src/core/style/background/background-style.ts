@@ -1,90 +1,92 @@
-// import { SetBackground } from './set-background';
-// import { ParamBackground } from './param-background';
-
-import {
-    NodeTypes,
-    TypePaints,
-    FrameFigma,
-    RectangleFigma
-} from "../../api";
+import { Nodes, TypePaints, FrameFigma, RectangleFigma } from "../../api";
 import { Style } from "../style";
 import { BackgroundParamStyle } from "./param-bg-style";
 import { BackgroundSetStyle } from "./bg-set-style";
+import { InnerArrow } from "src/core/inner-arrow";
 
 export class BackgroundStyle implements BackgroundSetStyle {
+  public style: Partial<Style>;
+  private backgroundMap: Map<TypePaints | Nodes, InnerArrow>;
 
-    public style: Partial<Style>;
-    private bgsMap: Map<TypePaints | NodeTypes, string>;
+  constructor(
+    style: Partial<Style>,
+    bgsMap?: Map<TypePaints | Nodes, InnerArrow>
+  ) {
+    this.style = style;
+    this.backgroundMap = bgsMap ? bgsMap : this.background();
+  }
 
-    constructor(style: Partial<Style>, bgsMap?: Map<TypePaints | NodeTypes, string>) {
-        this.style = style;
-        this.bgsMap = bgsMap ? bgsMap : this.bg();
+  public invoke(bgEnum: TypePaints | Nodes, param: BackgroundParamStyle): void {
+    this.backgroundMap.get(bgEnum).call(this, param);
+  }
+
+  private background(): Map<TypePaints | Nodes, InnerArrow> {
+    return new Map<TypePaints | Nodes, InnerArrow>()
+      .set(TypePaints.IMAGE, (param: BackgroundParamStyle) => this.image(param))
+      .set(TypePaints.SOLID, (param: BackgroundParamStyle) => this.solid(param))
+      .set(TypePaints.GRADIENT_LINEAR, (param: BackgroundParamStyle) =>
+        this.linearGradient(param)
+      )
+      .set(TypePaints.GRADIENT_RADIAL, (param: BackgroundParamStyle) =>
+        this.radialGradient(param)
+      )
+      .set(Nodes.FRAME, (param: BackgroundParamStyle) => this.fraComInst(param))
+      .set(Nodes.COMPONENT, (param: BackgroundParamStyle) =>
+        this.fraComInst(param)
+      )
+      .set(Nodes.INSTANCE, (param: BackgroundParamStyle) =>
+        this.fraComInst(param)
+      )
+      .set(Nodes.TEXT, (param: BackgroundParamStyle) => this.text(param));
+  }
+
+  private image(bgP: BackgroundParamStyle): void {
+    const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+    if (lastFill) {
+      this.style.backgroundImage = this.style.imageUrl(lastFill.imageRef);
+      if (lastFill.scaleMode === "FILL") {
+        this.style.backgroundSize = "cover";
+      } else {
+        this.style.backgroundSize = undefined;
+      }
     }
+  }
 
-    public set(bgEnum: TypePaints | NodeTypes,
-        bgParamStyle: BackgroundParamStyle): void {
-        const key: string = this.bgsMap.get(bgEnum);
-        key && this[key](bgParamStyle);
+  private solid(bgP: BackgroundParamStyle): void {
+    const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+    if (lastFill) {
+      this.style.backgroundColor = this.style.colorToString(lastFill.color);
+      this.style.opacity = `${lastFill.opacity}`;
     }
+  }
 
-    private bg(): Map<TypePaints | NodeTypes, string> {
-        const bgsMap = new Map();
-        bgsMap.set(TypePaints.IMAGE, 'image');
-        bgsMap.set(TypePaints.SOLID, 'solid');
-        bgsMap.set(TypePaints.GRADIENT_LINEAR, 'linearGradient');
-        bgsMap.set(TypePaints.GRADIENT_RADIAL, 'radialGradient');
-        bgsMap.set(NodeTypes.FRAME, 'fraComInst');
-        bgsMap.set(NodeTypes.COMPONENT, 'fraComInst');
-        bgsMap.set(NodeTypes.INSTANCE, 'fraComInst');
-        bgsMap.set(NodeTypes.TEXT, 'text');
-        return bgsMap;
+  private linearGradient(bgP: BackgroundParamStyle): void {
+    const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+    if (lastFill) {
+      this.style.background = this.style.paintToLinearGradient(lastFill);
     }
+  }
 
-    private image(bgP: BackgroundParamStyle) {
-        const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
-        if (lastFill) {
-            this.style.backgroundImage = this.style.imageUrl(lastFill.imageRef);
-            if (lastFill.scaleMode === 'FILL') {
-                this.style.backgroundSize = 'cover';
-            } else {
-                this.style.backgroundSize = undefined;
-            }
-        }
+  private radialGradient(bgP: BackgroundParamStyle): void {
+    const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+    if (lastFill) {
+      this.style.background = this.style.paintToRadialGradient(lastFill);
     }
+  }
 
-    private solid(bgP: BackgroundParamStyle) {
-        const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
-        if (lastFill) {
-            this.style.backgroundColor = this.style.colorToString(lastFill.color);
-            this.style.opacity = `${lastFill.opacity}`;
-        }
+  private fraComInst(bgP: BackgroundParamStyle): void {
+    this.style.backgroundColor = this.style.colorToString(
+      (bgP.value as FrameFigma).backgroundColor
+    );
+    if ((bgP.value as FrameFigma).clipsContent) {
+      this.style.overflow = "hidden";
     }
+  }
 
-    private linearGradient(bgP: BackgroundParamStyle) {
-        const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
-        if (lastFill) {
-            this.style.background = this.style.paintToLinearGradient(lastFill);
-        }
+  private text(bgP: BackgroundParamStyle): void {
+    const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+    if (lastFill) {
+      this.style.color = this.style.colorToString(lastFill.color);
     }
-
-    private radialGradient(bgP: BackgroundParamStyle) {
-        const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
-        if (lastFill) {
-            this.style.background = this.style.paintToRadialGradient(lastFill);
-        }
-    }
-
-    private fraComInst(bgP: BackgroundParamStyle) {
-        this.style.backgroundColor = this.style.colorToString((bgP.value as FrameFigma).backgroundColor);
-        if ((bgP.value as FrameFigma).clipsContent) {
-            this.style.overflow = 'hidden';
-        }
-    }
-
-    private text(bgP: BackgroundParamStyle) {
-        const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
-        if (lastFill) {
-            this.style.color = this.style.colorToString(lastFill.color);
-        }
-    }
+  }
 }

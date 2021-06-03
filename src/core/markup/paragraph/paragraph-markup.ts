@@ -1,95 +1,103 @@
-import { NodeTypes } from '../../api';
-import { ParagraphSetMarkup } from './paragraph-set-markup';
-import { ParagraphParamMarkup } from './paragraph-param-markup';
-import { Markup } from '../markup';
+import { Nodes } from "../../api";
+import { ParagraphSetMarkup } from "./paragraph-set-markup";
+import { ParagraphParamMarkup } from "./paragraph-param-markup";
+import { Markup } from "../markup";
+import { InnerArrow } from "src/core/inner-arrow";
 
 export class ParagraphMarkup implements ParagraphSetMarkup {
+  public markup: Partial<Markup>;
+  private paragraphMap: Map<Nodes, InnerArrow>;
 
-    public markup: Partial<Markup>;
-    private phMap: Map<NodeTypes, string>;
+  constructor(markup: Partial<Markup>, phMap?: Map<Nodes, InnerArrow>) {
+    this.markup = markup;
+    this.paragraphMap = phMap ? phMap : this.paragraph();
+  }
 
-    constructor(markup: Partial<Markup>, phMap?: Map<NodeTypes, string>) {
-        this.markup = markup;
-        this.phMap = phMap ? phMap : this.paragraph();
-    }
+  public invoke(nodeTypes: Nodes, phParamMarkup: ParagraphParamMarkup): void {
+    this.paragraphMap.get(nodeTypes).call(this, phParamMarkup);
+  }
 
-    public set(bgEnum: NodeTypes, phParamMarkup: ParagraphParamMarkup): void {
-        const key = this.phMap.get(bgEnum);
-        key && this[key](phParamMarkup);
-    }
+  private paragraph(): Map<Nodes, InnerArrow> {
+    return new Map<Nodes, InnerArrow>().set(
+      Nodes.TEXT,
+      (param: ParagraphParamMarkup) => this.text(param)
+    );
+  }
 
-    private paragraph(): Map<NodeTypes, string> {
-        const phMap = new Map();
-        phMap.set(NodeTypes.TEXT, 'text');
-        return phMap;
-    }
+  private commit(key: any, paragraph: ParagraphParamMarkup): void {
+    if (paragraph.para !== "") {
+      if (
+        paragraph.styleCache[paragraph.currStyle] == null &&
+        paragraph.currStyle !== 0
+      ) {
+        paragraph.styleCache[paragraph.currStyle] = {};
+        paragraph?.fontSetStyle.invoke(
+          paragraph.styleCache[paragraph.currStyle],
+          paragraph.value.styleOverrideTable[paragraph.currStyle]
+        );
+      }
+      const styleOverride = paragraph.styleCache[paragraph.currStyle]
+        ? JSON.stringify(paragraph.styleCache[paragraph.currStyle])
+        : "{}";
+      let varName;
 
-    private commit(key: any, phPMp: ParagraphParamMarkup): void {
+      if (paragraph.value.name.charAt(0) === "$") {
+        varName = paragraph.value.name.substring(1);
+      }
 
-        if (phPMp.para !== '') {
-
-            if (phPMp.styleCache[phPMp.currStyle] == null && phPMp.currStyle !== 0) {
-                phPMp.styleCache[phPMp.currStyle] = {};
-                phPMp?.fontSetStyle.set(phPMp.styleCache[phPMp.currStyle],
-                    phPMp.value.styleOverrideTable[phPMp.currStyle]);
-            }
-            const styleOverride = phPMp.styleCache[phPMp.currStyle] ?
-                JSON.stringify(phPMp.styleCache[phPMp.currStyle]) : '{}';
-            let varName;
-
-            if (phPMp.value.name.charAt(0) === '$') {
-                varName = phPMp.value.name.substring(1);
-            }
-
-            if (varName) {
-                phPMp.para = `
+      if (varName) {
+        paragraph.para = `
                     <ng-container *ngIf="props?.${varName}">{{props.${varName}}}</ng-container>
-                    <ng-container *ngIf="!props?.${varName}">${phPMp.para}</ng-container>
+                    <ng-container *ngIf="!props?.${varName}">${paragraph.para}</ng-container>
                     `;
-            }
-            phPMp.ps.push(`<span [ngStyle]="${styleOverride.replace(/"/g, "'")}" key="${key}">${phPMp.para}</span>`);
-            phPMp.para = '';
-        }
+      }
+      paragraph.ps.push(
+        `<span [ngStyle]="${styleOverride.replace(/"/g, "'")}" key="${key}">${
+          paragraph.para
+        }</span>`
+      );
+      paragraph.para = "";
     }
+  }
 
-    private text(phPMp: ParagraphParamMarkup) {
+  private text(paragraph: ParagraphParamMarkup) {
+    if (paragraph.value.name.substring(0, 6) === "input:") {
+      paragraph.content = [
+        `<input key="${paragraph.value.id}"` +
+          `type="text" placeholder="${paragraph.value.characters}"` +
+          ` name="${paragraph.value.name.substring(7)}" />`,
+      ];
+    } else if (paragraph.value.characterStyleOverrides) {
+      paragraph.para = "";
+      paragraph.ps = [];
+      paragraph.styleCache = {};
+      paragraph.currStyle = 0;
 
-        if (phPMp.value.name.substring(0, 6) === 'input:') {
-            phPMp.content = [`<input key="${phPMp.value.id}"` +
-                             `type="text" placeholder="${phPMp.value.characters}"` +
-                             ` name="${phPMp.value.name.substring(7)}" />`];
+      for (const i in paragraph.value.characters) {
+        let idx = paragraph.value.characterStyleOverrides[i];
 
-        } else if (phPMp.value.characterStyleOverrides) {
-            phPMp.para = '';
-            phPMp.ps = [];
-            phPMp.styleCache = {};
-            phPMp.currStyle = 0;
-
-            for (const i in phPMp.value.characters) {
-                let idx = phPMp.value.characterStyleOverrides[i];
-
-                if (phPMp.value.characters[i] === '\n') {
-                    this.commit(i, phPMp);
-                    phPMp.ps.push(`<br key="${`br${i}`}" />`);
-                    continue;
-                }
-
-                if (idx == null) {
-                    idx = 0;
-                }
-
-                if (idx !== phPMp.currStyle) {
-                    this.commit(i, phPMp);
-                    phPMp.currStyle = idx;
-                }
-                phPMp.para += phPMp.value.characters[i];
-            }
-            this.commit('end', phPMp);
-            phPMp.content = phPMp.ps;
-        } else {
-            phPMp.content = phPMp.value.characters
-                                       .split("\n")
-                                       .map((line: any, idx: any) => `<div key="${idx}">${line}</div>`);
+        if (paragraph.value.characters[i] === "\n") {
+          this.commit(i, paragraph);
+          paragraph.ps.push(`<br key="${`br${i}`}" />`);
+          continue;
         }
+
+        if (idx == null) {
+          idx = 0;
+        }
+
+        if (idx !== paragraph.currStyle) {
+          this.commit(i, paragraph);
+          paragraph.currStyle = idx;
+        }
+        paragraph.para += paragraph.value.characters[i];
+      }
+      this.commit("end", paragraph);
+      paragraph.content = paragraph.ps;
+    } else {
+      paragraph.content = paragraph.value.characters
+        .split("\n")
+        .map((line: any, idx: any) => `<div key="${idx}">${line}</div>`);
     }
+  }
 }
