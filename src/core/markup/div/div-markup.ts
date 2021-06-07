@@ -20,22 +20,15 @@ export class DivMarkup implements DivSetMarkup {
     if (divPMp.parent != null) {
       this.divMap.get(Characters.PARENT_START).call(this, divPMp);
     }
-
-    if (divMarkupes === Nodes.VECTOR) {
+    if (
+      divPMp.value.id !== divPMp.component.id &&
+      divPMp.value.name.charAt(0) === "#"
+    ) {
+      this.divMap.get(Characters.HASH).call(this, divPMp);
+    } else if (divMarkupes === Nodes.VECTOR) {
       this.divMap.get(divMarkupes).call(this, divPMp);
     } else {
-      const hash = (
-        value: { id: any; name: string },
-        component: { id: any }
-      ) => {
-        if (value.id !== component.id && value.name.charAt(0) === "#") {
-          return Characters.HASH;
-        } else {
-          return Characters.DEFAULT;
-        }
-      };
-      const res = hash(divPMp.value, divPMp.component);
-      this.divMap.get(res).call(this, divPMp);
+      this.divMap.get(Characters.DEFAULT).call(this, divPMp);
     }
 
     if (divPMp.parent != null) {
@@ -62,7 +55,7 @@ export class DivMarkup implements DivSetMarkup {
   }
 
   private parentStart(divPMp: DivParamMarkup) {
-    this.print(divPMp);
+    this.printDiv(divPMp);
   }
 
   private parentEnd(divPMp: DivParamMarkup) {
@@ -74,7 +67,7 @@ export class DivMarkup implements DivSetMarkup {
     const nodeName = divPMp.value.name.replace(/\W+/g, "");
     // TODO: parse props
     divPMp.nodeName = `app-C${nodeName}`;
-    this.print(divPMp);
+    this.printDiv(divPMp);
     divPMp.codeGen.createComponent(
       divPMp.value,
       divPMp.imgMap,
@@ -83,7 +76,8 @@ export class DivMarkup implements DivSetMarkup {
     );
   }
 
-  private print(divPMp: DivParamMarkup): void {
+  private printDiv(divPMp: DivParamMarkup): void {
+    console.log("printDiv: ", divPMp.outerStyle);
     this.markup.print(
       `<div [ngStyle]="${JSON.stringify(divPMp.outerStyle).replace(/"/g, "'")}" 
                                     class="${divPMp.outerClass.replace(
@@ -125,6 +119,7 @@ export class DivMarkup implements DivSetMarkup {
     let first = true;
 
     for (const child of divPMp.minChildren) {
+      console.log("visitNode minChildren: ", divPMp.minChildren.length);
       divPMp.codeGen.visitNode(
         child,
         divPMp.value,
@@ -136,6 +131,7 @@ export class DivMarkup implements DivSetMarkup {
     }
 
     for (const child of divPMp.centerChildren) {
+      console.log("visitNode centerChildren: ", divPMp.centerChildren.length);
       divPMp.codeGen.visitNode(
         child,
         divPMp.value,
@@ -151,10 +147,14 @@ export class DivMarkup implements DivSetMarkup {
       divPMp.style.pointerEvents = "none";
       divPMp.style.backgroundColor = null;
       divPMp.indent += "      ";
-      this.print(divPMp);
+      this.printDiv(divPMp);
       first = true;
 
       for (const child of divPMp.maxChildren) {
+        console.log(
+          "visitNode divPMp.maxChildren: ",
+          divPMp.maxChildren.length
+        );
         divPMp.codeGen.visitNode(
           child,
           divPMp.value,

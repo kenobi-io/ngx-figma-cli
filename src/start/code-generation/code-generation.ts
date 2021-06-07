@@ -1,6 +1,6 @@
-import { map, catchError, mergeMap, concatMap } from 'rxjs/operators';
-import { of, forkJoin } from 'rxjs';
-import fetch from 'node-fetch';
+import { map, catchError, mergeMap, concatMap } from "rxjs/operators";
+import { of, forkJoin } from "rxjs";
+import fetch from "node-fetch";
 import * as fs from "fs";
 
 import {
@@ -19,7 +19,7 @@ import {
   ParagraphMarkup,
   Markup,
   ParagraphParamMarkup,
-  NodeTypes,
+  Nodes,
   DivSetMarkup,
   DivMarkup,
   DivParamMarkup,
@@ -29,17 +29,17 @@ import {
   Vectors,
   Groups,
   LayoutConstraints,
-  LayoutParamStyle
-} from '../../core';
+  LayoutParamStyle,
+  RectangleFigma,
+} from "../../core";
 
 export class CodeGeneration {
-
   private layoutStyle: LayoutSetStyle;
-  private bgStyle: BackgroundSetStyle;
+  private backgroundStyle: BackgroundSetStyle;
   private effectStyle: EffectSetStyle;
   private strokeStyle: StrokeSetStyle;
   private fontStyle: FontSetStyle;
-  private phSetMarkup: ParagraphSetMarkup;
+  private paragraphSetMarkup: ParagraphSetMarkup;
   private divSetMarkup: DivSetMarkup;
   private api: RestApiService;
 
@@ -47,16 +47,17 @@ export class CodeGeneration {
     const style = new Style();
     const markup = new Markup();
     this.layoutStyle = new LayoutStyle(style);
-    this.bgStyle = new BackgroundStyle(style);
+    this.backgroundStyle = new BackgroundStyle(style);
     this.effectStyle = new EffectStyle(style);
     this.strokeStyle = new StrokeStyle(style);
     this.fontStyle = new FontStyle(style);
-    this.phSetMarkup = new ParagraphMarkup(markup);
+    this.paragraphSetMarkup = new ParagraphMarkup(markup);
     this.divSetMarkup = new DivMarkup(markup);
     this.api = new RestApiService();
   }
 
-  public generate(result: any, codeGen?: CodeGeneration): void { // result files request
+  public generate(result: any, codeGen?: CodeGeneration): void {
+    // result files request
     const vectorList: any[] = [];
     const vectorMap = {};
     let responses;
@@ -68,35 +69,35 @@ export class CodeGeneration {
     for (let i = 0; i < canvas.children.length; i++) {
       const child = canvas.children[i];
       console.log(`name is ${child.name} and id: `, child.id);
-      if (child.name.charAt(0) === '#' && child.visible !== false) {
+      if (child.name.charAt(0) === "#" && child.visible !== false) {
         const child = canvas.children[i];
         this.preprocessTree(child, vectorList, vectorMap);
       }
     }
 
-    let guids = vectorList.join(',');
+    let guids = vectorList.join(",");
     let promises: unknown[] = [];
     let images;
 
-    this.api.get(ImagesRequest, guids)
+    this.api
+      .get(ImagesRequest, guids)
       .pipe(
         concatMap(async (res) => {
           data = res;
           // const imageRes = []
           const imageJSON = data;
           images = imageJSON.images || {};
-          console.log('ImagesRequest images:', images);
           if (images) {
             let guids = [];
 
             for (const guid in images) {
-
               if (images[guid] == null) {
                 continue;
               }
-              console.log('guid: ', guid);
               guids.push(guid);
-              const re = await this.api.get(ImageRequest, images[guid]).toPromise();
+              const re = await this.api
+                .get(ImageRequest, images[guid])
+                .toPromise();
               promises.push(re);
             }
           }
@@ -110,12 +111,15 @@ export class CodeGeneration {
           responses = promises;
 
           for (let i = 0; i < responses.length; i++) {
-            images[guids[i]] = responses[i].toString().replace('<svg ', '<svg preserveAspectRatio="none" ');
+            images[guids[i]] = responses[i]
+              .toString()
+              .replace("<svg ", '<svg preserveAspectRatio="none" ');
           }
           return of(images);
         }),
         catchError((err) => this.errHandler(err))
-      ).subscribe((images: []) => {
+      )
+      .subscribe((images: []) => {
         const componentMap: any = {};
         let contents = `import { NgModule } from '@angular/core';\n`;
         contents += `import { FormsModule } from '@angular/forms';\n`;
@@ -125,8 +129,9 @@ export class CodeGeneration {
         for (let i = 0; i < canvas.children.length; i++) {
           const child = canvas.children[i];
 
-          if (child.name.charAt(0) === '#' && child.visible !== false) {
+          if (child.name.charAt(0) === "#" && child.visible !== false) {
             const child = canvas.children[i];
+            console.log("canvas.children.length: ", canvas.children.length);
             this.createComponent(child, images, componentMap, div);
           }
         }
@@ -139,17 +144,17 @@ export class CodeGeneration {
 
           if (!imported[name]) {
             contents += `import { ${name}Component } from './${name}.component';\n`;
-            components.push(name + 'Component');
+            components.push(name + "Component");
           }
           imported[name] = true;
         }
         contents += "\n";
         contents += nextSection;
-        nextSection = '';
-        nextSection += '@NgModule({\n';
-        nextSection += '  imports: [ CommonModule, FormsModule ],\n';
-        nextSection += `  declarations: [ ${components.join(', ')} ],\n`;
-        nextSection += `  exports: [ ${components.join(', ')} ],\n`;
+        nextSection = "";
+        nextSection += "@NgModule({\n";
+        nextSection += "  imports: [ CommonModule, FormsModule ],\n";
+        nextSection += `  declarations: [ ${components.join(", ")} ],\n`;
+        nextSection += `  exports: [ ${components.join(", ")} ],\n`;
         nextSection += `})\n`;
         nextSection += `export class FigmaModule { }`;
         contents += nextSection;
@@ -170,43 +175,53 @@ export class CodeGeneration {
     return err;
   }
 
-  private preprocessTree(node: {
-    name: string;
-    fills: any;
-    strokes: any;
-    blendMode: string | null;
-    type: any;
-    children: any[];
-    constraints: {
-      vertical: any;
-      horizontal: any;
-    };
-    id: string | number;
-  }, vectorList: any[], vectorMap: any) {
-    let vectorsOnly = node.name.charAt(0) !== '#';
+  private preprocessTree(
+    node: {
+      name: string;
+      fills: any;
+      strokes: any;
+      blendMode: string | null;
+      type: any;
+      children: any[];
+      constraints: {
+        vertical: any;
+        horizontal: any;
+      };
+      id: string | number;
+    },
+    vectorList: any[],
+    vectorMap: any
+  ) {
+    let vectorsOnly = node.name.charAt(0) !== "#";
     let vectorVConstraint = null;
     let vectorHConstraint = null;
 
-    if (this.paintsRequireRender(node.fills)
-      || this.paintsRequireRender(node.strokes)
-      || (node.blendMode != null
-        && ['PASS_THROUGH', 'NORMAL'].indexOf(node.blendMode) < 0)) {
-      node.type = 'VECTOR';
+    if (
+      this.paintsRequireRender(node.fills) ||
+      this.paintsRequireRender(node.strokes) ||
+      (node.blendMode != null &&
+        ["PASS_THROUGH", "NORMAL"].indexOf(node.blendMode) < 0)
+    ) {
+      node.type = "VECTOR";
     }
-    const children = node.children && node.children.filter((child) => child.visible !== false);
+    const children =
+      node.children && node.children.filter((child) => child.visible !== false);
 
     if (children) {
       for (let j = 0; j < children.length; j++) {
         if (Object.values(Vectors).includes(children[j].type)) {
           vectorsOnly = false;
-        }
-        else {
-          if (vectorVConstraint != null
-            && children[j].constraints.vertical != vectorVConstraint) {
+        } else {
+          if (
+            vectorVConstraint != null &&
+            children[j].constraints.vertical != vectorVConstraint
+          ) {
             vectorsOnly = false;
           }
-          if (vectorHConstraint != null
-            && children[j].constraints.horizontal != vectorHConstraint) {
+          if (
+            vectorHConstraint != null &&
+            children[j].constraints.horizontal != vectorHConstraint
+          ) {
             vectorsOnly = false;
           }
           vectorVConstraint = children[j].constraints.vertical;
@@ -217,7 +232,7 @@ export class CodeGeneration {
     node.children = children;
 
     if (children && children.length > 0 && vectorsOnly) {
-      node.type = 'VECTOR';
+      node.type = "VECTOR";
       node.constraints = {
         vertical: vectorVConstraint,
         horizontal: vectorHConstraint,
@@ -225,7 +240,7 @@ export class CodeGeneration {
     }
 
     if (Object.values(Vectors).includes(node.type)) {
-      node.type = 'VECTOR';
+      node.type = "VECTOR";
       vectorMap[node.id] = node;
       vectorList.push(node.id);
       node.children = [];
@@ -239,7 +254,6 @@ export class CodeGeneration {
   }
 
   private paintsRequireRender(paints: any): boolean {
-
     if (!paints) {
       return false;
     }
@@ -249,7 +263,7 @@ export class CodeGeneration {
         continue;
       }
       numPaints++;
-      if (paint.type === 'EMOJI') {
+      if (paint.type === "EMOJI") {
         return true;
       }
     }
@@ -257,13 +271,17 @@ export class CodeGeneration {
     return numPaints > 1;
   }
 
-  public createComponent(component: any, imagesMap: any, componentMap: any, div?: DivParamMarkup) {
-    const name = 'C' + component.name.replace(/\W+/g, '');
-    const instance = name + component.id.replace(';', 'S').replace(':', 'D');
+  public createComponent(
+    component: any,
+    imagesMap: any,
+    componentMap: any,
+    div?: DivParamMarkup
+  ) {
+    const name = "C" + component.name.replace(/\W+/g, "");
+    const instance = name + component.id.replace(";", "S").replace(":", "D");
     const path = `src/components/${name}.component.ts`;
 
     if (!fs.existsSync(path)) {
-
       const componentSrc = `
       import { Component, Input } from '@angular/core';
       @Component({
@@ -275,136 +293,185 @@ export class CodeGeneration {
       }`;
 
       fs.writeFile(path, componentSrc, (err: any) => {
-        if (err) { console.log(err); }
+        if (err) {
+          console.log(err);
+        }
         console.log(`wrote ${path}`);
       });
     }
-
+    div.component = component;
     div.imgMap = imagesMap;
-
-    this.visitNode(component, null, null, '  ', div);
+    div.componentMap = componentMap;
+    console.log("visitNode call");
+    this.visitNode(component, null, null, "  ", div);
 
     const htmPath = `src/components/${name}.component.html`;
     fs.writeFile(htmPath, this.divSetMarkup.markup.document, (err: any) => {
       if (err) console.log(err);
       console.log(`wrote ${htmPath}`);
     });
-    componentMap[component.id] = { instance, name, doc: this.divSetMarkup.markup.document };
+    componentMap[component.id] = {
+      instance,
+      name,
+      doc: this.divSetMarkup.markup.document,
+    };
   }
 
-  public visitNode(node: any,
+  public visitNode(
+    node: any,
     parent: Window | null | any,
     lastVertical: number | null,
     indent?: any,
-    div?: DivParamMarkup) {
-
+    div?: DivParamMarkup
+  ) {
     let content = null;
-    const styles = {};
-    let minChildren: [] = [];
-    const maxChildren: [] = [];
-    const centerChildren: [] = [];
-    let bounds: Partial<Style>;
-    const bgParam: LayoutParamStyle = {} as LayoutParamStyle;
-    let nodeBounds = null
+    node.style = {};
+    let minChildren = [];
+    const maxChildren = [];
+    const centerChildren = [];
+    let bounds: Partial<Style> = null;
+    const layoutParam: LayoutParamStyle = {} as LayoutParamStyle;
+    let nodeBounds = null;
+    layoutParam.value = bounds as Style;
 
     if (parent != null) {
       nodeBounds = node.absoluteBoundingBox;
       const nx2 = nodeBounds.x + nodeBounds.width;
       const ny2 = nodeBounds.y + nodeBounds.height;
       const parentBounds = parent.absoluteBoundingBox;
-      const px = parentBounds?.x;
-      const py = parentBounds?.y;
+      const px = parentBounds.x;
+      const py = parentBounds.y;
 
       bounds = {
         left: `${nodeBounds.x - px}`,
         right: `${px + parentBounds?.width - nx2}`,
-        top: lastVertical == null ? `${nodeBounds.y - py}` : `${nodeBounds.y - lastVertical}`,
+        top:
+          lastVertical == null
+            ? `${nodeBounds.y - py}`
+            : `${nodeBounds.y - lastVertical}`,
         bottom: `${py + parentBounds?.height - ny2}`,
         width: nodeBounds.width,
         height: nodeBounds.height,
-      }
-
-      bgParam.value = bounds as Style;
+      };
     }
-
-    this.expandChildren(node, parent, minChildren, maxChildren, centerChildren, 0);
-
-    const phPMp = {} as ParagraphParamMarkup;
-    phPMp.content = content;
-    phPMp.fontSetStyle = this.fontStyle;
-
-    div.value = {};
+    this.expandChildren(
+      node,
+      parent,
+      minChildren,
+      maxChildren,
+      centerChildren,
+      0
+    );
+    const paragraphParamMarkup = {} as ParagraphParamMarkup;
+    paragraphParamMarkup.content = content;
+    paragraphParamMarkup.fontSetStyle = this.fontStyle;
+    div.value = node;
     div.value.id = node.id;
-    div.component = node;
     div.indent = indent;
-    div.minChildren = minChildren;
-    div.centerChildren = centerChildren;
-    div.maxChildren = maxChildren;
-    div.outerClass = 'outerDiv';
-    bgParam.outerClass = 'outerDiv';
-    bgParam.outerStyle = {} as Style;
-    div.innerClass = 'innerDiv';
-
-    if (node.order) {
-      bgParam.outerStyle.zIndex = node.order;
-    }
-
+    div.minChildren = minChildren as any;
+    div.centerChildren = centerChildren as any;
+    div.maxChildren = maxChildren as any;
+    div.outerClass = "outerDiv";
+    layoutParam.outerClass = "outerDiv";
+    layoutParam.outerStyle = {} as Style;
+    div.outerStyle = layoutParam.outerStyle;
+    div.innerClass = "innerDiv";
     const cHorizontal = node.constraints && node.constraints.horizontal;
     const cVertical = node.constraints && node.constraints.vertical;
-    bgParam.isVertical = false;
-    this.layoutStyle.set(cHorizontal, bgParam)
-    bgParam.isVertical = true;
-    this.layoutStyle.set(cVertical, bgParam);
 
-    this.bgStyle.set(node.type, { value: node });
-    for (let effect of node.effects) {
-      this.effectStyle.set(effect.type, { value: effect });
+    console.log("node type: ", node.type);
+    if (node.order) {
+      layoutParam.outerStyle.zIndex = node.order;
     }
-    this.strokeStyle.set(node.type, { value: node });
-    this.fontStyle.set(node.type, { value: node.style });
-    this.phSetMarkup.set(node.type, phPMp);
-    this.divSetMarkup.set(node.type, div);
+    // --- constraints
+    layoutParam.isVertical = false;
+    this.layoutStyle.invoke(cHorizontal, layoutParam); // +
+    layoutParam.isVertical = true;
+    this.layoutStyle.invoke(cVertical, layoutParam); // +
+    node.style = this.layoutStyle.style;
+    div.style = node.style;
+    // console.log("node style", node.style);
+    // ---
+    // --- FRAME, RECTANGLE, INSTANCE, COMPONENT
+    if (
+      node.type === Nodes.FRAME ||
+      node.type === Nodes.INSTANCE ||
+      node.type === Nodes.COMPONENT
+    ) {
+      this.backgroundStyle.style.backgroundColor =
+        this.backgroundStyle.style.colorToString(node.backgroundColor);
+      node.style.backgroundColor = this.backgroundStyle.style.backgroundColor;
+    } else if (node.type === Nodes.RECTANGLE) {
+      // --- --- SOLID
+      const lastFill = this.backgroundStyle.style.lastPaint(
+        (node as RectangleFigma).fills
+      );
+      this.backgroundStyle.style = node.style;
+      this.backgroundStyle.invoke(lastFill.type, { value: node }); // +
+
+      this.fontStyle.style = node.style;
+      for (let effect of node.effects) {
+        this.effectStyle.invoke(effect.type, { value: effect }); // +
+      }
+      this.strokeStyle.style = node.style;
+      this.strokeStyle.invoke(node.type, { value: node }); // +
+    } else if (node.type === Nodes.TEXT) {
+      // --- TEXT
+      this.backgroundStyle.invoke(node.type, { value: node });
+      this.fontStyle.style = node.style;
+      this.fontStyle.invoke(node.type, { value: node.style });
+      this.paragraphSetMarkup.invoke(node.type, paragraphParamMarkup);
+    }
+    this.divSetMarkup.invoke(node.type, div);
   }
 
-  private expandChildren(node: any,
+  private expandChildren(
+    node: any,
     parent: null,
     minChildren: any[],
     maxChildren: any[],
     centerChildren: any[],
-    offset: number) {
-
+    offset: number
+  ) {
     const children = node.children;
     let added = offset;
-
+    console.log("EX node.children: ", node.children);
     if (children) {
-
       for (let i = 0; i < children.length; i++) {
         const child = children[i];
 
-        if (parent != null
-          && (node.type === NodeTypes.COMPONENT || node.type === NodeTypes.INSTANCE)) {
+        if (
+          parent != null &&
+          (node.type === Nodes.COMPONENT || node.type === Nodes.INSTANCE)
+        ) {
           child.constraints = {
             vertical: LayoutConstraints.TOP_BOTTOM,
-            horizontal: LayoutConstraints.LEFT_RIGHT
+            horizontal: LayoutConstraints.LEFT_RIGHT,
           };
         }
 
         if (Object.values(Groups).includes(child.type)) {
-          added += this.expandChildren(child,
+          added += this.expandChildren(
+            child,
             parent,
             minChildren,
             maxChildren,
             centerChildren,
-            added + i);
+            added + i
+          );
           continue;
         }
         child.order = i + added;
 
-        if (child.constraints
-          && child.constraints.vertical === LayoutConstraints.BOTTOM) {
+        if (
+          child.constraints &&
+          child.constraints.vertical === LayoutConstraints.BOTTOM
+        ) {
           maxChildren.push(child);
-        } else if (child.constraints
-          && child.constraints.vertical === LayoutConstraints.TOP) {
+        } else if (
+          child.constraints &&
+          child.constraints.vertical === LayoutConstraints.TOP
+        ) {
           minChildren.push(child);
         } else {
           centerChildren.push(child);
@@ -428,5 +495,4 @@ export class CodeGeneration {
       return 1;
     }
   }
-
 }
