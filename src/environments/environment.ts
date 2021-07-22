@@ -5,10 +5,10 @@
 export const environment = {
   production: true,
   fileKey: process.env.FILE_KEY || 'SRsKstDfn3iG9utOcS0YY6',
-  token: process.env.DEV_TOKEN || '160268-d475cd95-efa0-4894-90ae-ec159f5383b2',
+  token: process.env.DEV_TOKEN || '203090-63cd909a-5ce6-4370-8b53-e19f27becaa8',
   url: 'https://api.figma.com',
   versionFile: 'v1/files',
-  versionImage: 'v1/images'
+  versionImage: 'v1/images',
 };
 
 /*

@@ -1,8 +1,8 @@
-import { Nodes } from "../../api";
-import { ParagraphSetMarkup } from "./paragraph-set-markup";
-import { ParagraphParamMarkup } from "./paragraph-param-markup";
-import { Markup } from "../markup";
-import { InnerArrow } from "src/core/inner-arrow";
+import { Nodes } from '../../api';
+import { ParagraphSetMarkup } from './paragraph-set-markup';
+import { ParagraphParamMarkup } from './paragraph-param-markup';
+import { Markup } from '../markup';
+import { InnerArrow } from 'src/core/inner-arrow';
 
 export class ParagraphMarkup implements ParagraphSetMarkup {
   public markup: Partial<Markup>;
@@ -25,7 +25,7 @@ export class ParagraphMarkup implements ParagraphSetMarkup {
   }
 
   private commit(key: any, paragraph: ParagraphParamMarkup): void {
-    if (paragraph.para !== "") {
+    if (paragraph.para !== '') {
       if (
         paragraph.styleCache[paragraph.currStyle] == null &&
         paragraph.currStyle !== 0
@@ -38,10 +38,10 @@ export class ParagraphMarkup implements ParagraphSetMarkup {
       }
       const styleOverride = paragraph.styleCache[paragraph.currStyle]
         ? JSON.stringify(paragraph.styleCache[paragraph.currStyle])
-        : "{}";
+        : '{}';
       let varName;
 
-      if (paragraph.value.name.charAt(0) === "$") {
+      if (paragraph.value.name.charAt(0) === '$') {
         varName = paragraph.value.name.substring(1);
       }
 
@@ -56,19 +56,20 @@ export class ParagraphMarkup implements ParagraphSetMarkup {
           paragraph.para
         }</span>`
       );
-      paragraph.para = "";
+      paragraph.para = '';
     }
   }
 
   private text(paragraph: ParagraphParamMarkup) {
-    if (paragraph.value.name.substring(0, 6) === "input:") {
+    if (paragraph.value.name.substring(0, 6) === 'input:') {
+      console.log('content: if input');
       paragraph.content = [
         `<input key="${paragraph.value.id}"` +
           `type="text" placeholder="${paragraph.value.characters}"` +
           ` name="${paragraph.value.name.substring(7)}" />`,
       ];
     } else if (paragraph.value.characterStyleOverrides) {
-      paragraph.para = "";
+      paragraph.para = '';
       paragraph.ps = [];
       paragraph.styleCache = {};
       paragraph.currStyle = 0;
@@ -76,7 +77,7 @@ export class ParagraphMarkup implements ParagraphSetMarkup {
       for (const i in paragraph.value.characters) {
         let idx = paragraph.value.characterStyleOverrides[i];
 
-        if (paragraph.value.characters[i] === "\n") {
+        if (paragraph.value.characters[i] === '\n') {
           this.commit(i, paragraph);
           paragraph.ps.push(`<br key="${`br${i}`}" />`);
           continue;
@@ -92,11 +93,13 @@ export class ParagraphMarkup implements ParagraphSetMarkup {
         }
         paragraph.para += paragraph.value.characters[i];
       }
-      this.commit("end", paragraph);
+      this.commit('end', paragraph);
+      console.log('content: characterStyleOverrides');
       paragraph.content = paragraph.ps;
     } else {
+      console.log('content: else');
       paragraph.content = paragraph.value.characters
-        .split("\n")
+        .split('\n')
         .map((line: any, idx: any) => `<div key="${idx}">${line}</div>`);
     }
   }

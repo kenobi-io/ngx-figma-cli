@@ -1,8 +1,8 @@
-import { Markup } from "../markup";
-import { DivParamMarkup } from "./div-param-markup";
-import { DivSetMarkup } from "./div-set-markup";
-import { Characters, Nodes } from "../../api";
-import { InnerArrow } from "src/core/inner-arrow";
+import { Markup } from '../markup';
+import { DivParamMarkup } from './div-param-markup';
+import { DivSetMarkup } from './div-set-markup';
+import { Characters, Nodes } from '../../api';
+import { InnerArrow } from 'src/core/inner-arrow';
 
 export class DivMarkup implements DivSetMarkup {
   public markup: Partial<Markup>;
@@ -22,10 +22,11 @@ export class DivMarkup implements DivSetMarkup {
     }
     if (
       divPMp.value.id !== divPMp.component.id &&
-      divPMp.value.name.charAt(0) === "#"
+      divPMp.value.name.charAt(0) === '#'
     ) {
       this.divMap.get(Characters.HASH).call(this, divPMp);
     } else if (divMarkupes === Nodes.VECTOR) {
+      console.log('divMarkupes: VECTOR');
       this.divMap.get(divMarkupes).call(this, divPMp);
     } else {
       this.divMap.get(Characters.DEFAULT).call(this, divPMp);
@@ -64,7 +65,7 @@ export class DivMarkup implements DivSetMarkup {
   }
 
   private chartAtHash(divPMp: DivParamMarkup) {
-    const nodeName = divPMp.value.name.replace(/\W+/g, "");
+    const nodeName = divPMp.value.name.replace(/\W+/g, '');
     // TODO: parse props
     divPMp.nodeName = `app-C${nodeName}`;
     this.printDiv(divPMp);
@@ -77,7 +78,7 @@ export class DivMarkup implements DivSetMarkup {
   }
 
   private printDiv(divPMp: DivParamMarkup): void {
-    console.log("printDiv: ", divPMp.outerStyle);
+    console.log('printDiv: ', divPMp.outerStyle);
     this.markup.print(
       `<div [ngStyle]="${JSON.stringify(divPMp.outerStyle).replace(/"/g, "'")}" 
                                     class="${divPMp.outerClass.replace(
@@ -86,7 +87,7 @@ export class DivMarkup implements DivSetMarkup {
                                     )}">`,
       divPMp.indent
     );
-    if (divPMp.nodeName !== "div") {
+    if (divPMp.nodeName !== 'div') {
       this.markup.print(`  <${divPMp.nodeName} [props]="props"`, divPMp.indent);
     } else {
       this.markup.print(`  <div`, divPMp.indent);
@@ -98,9 +99,9 @@ export class DivMarkup implements DivSetMarkup {
     );
     this.markup.print(`    class="${divPMp.innerClass}"`, divPMp.indent);
     this.markup.print(`  >`, divPMp.indent);
-    if (divPMp.nodeName !== "div") {
-      this.markup.print(`</${divPMp.nodeName}>`, "");
-      this.markup.print(`</div>`, "");
+    if (divPMp.nodeName !== 'div') {
+      this.markup.print(`</${divPMp.nodeName}>`, '');
+      this.markup.print(`</div>`, '');
     }
   }
 
@@ -119,47 +120,47 @@ export class DivMarkup implements DivSetMarkup {
     let first = true;
 
     for (const child of divPMp.minChildren) {
-      console.log("visitNode minChildren: ", divPMp.minChildren.length);
+      // console.log('visitNode minChildren: ', divPMp.minChildren.length);
       divPMp.codeGen.visitNode(
         child,
         divPMp.value,
         first ? null : newLastVertical,
-        divPMp.indent + "      ",
+        divPMp.indent + '      ',
         divPMp
       );
       first = false;
     }
 
     for (const child of divPMp.centerChildren) {
-      console.log("visitNode centerChildren: ", divPMp.centerChildren.length);
+      // console.log('visitNode centerChildren: ', divPMp.centerChildren.length);
       divPMp.codeGen.visitNode(
         child,
         divPMp.value,
         null,
-        divPMp.indent + "      ",
+        divPMp.indent + '      ',
         divPMp
       );
     }
 
     if (divPMp.maxChildren.length > 0) {
-      divPMp.outerClass += " maxer";
-      divPMp.style.width = "100%";
-      divPMp.style.pointerEvents = "none";
+      divPMp.outerClass += ' maxer';
+      divPMp.style.width = '100%';
+      divPMp.style.pointerEvents = 'none';
       divPMp.style.backgroundColor = null;
-      divPMp.indent += "      ";
+      divPMp.indent += '      ';
       this.printDiv(divPMp);
       first = true;
 
       for (const child of divPMp.maxChildren) {
         console.log(
-          "visitNode divPMp.maxChildren: ",
+          'visitNode divPMp.maxChildren: ',
           divPMp.maxChildren.length
         );
         divPMp.codeGen.visitNode(
           child,
           divPMp.value,
           first ? null : newLastVertical,
-          divPMp.indent + "          ",
+          divPMp.indent + '          ',
           divPMp
         );
         first = false;
@@ -169,14 +170,15 @@ export class DivMarkup implements DivSetMarkup {
     }
 
     if (divPMp.content != null) {
-      if (divPMp.value.name.charAt(0) === "$") {
-        // const varName = divPMp.value.name.substring(1);
+      console.log('content: != null');
+      if (divPMp.value.name.charAt(0) === '$') {
+        const varName = divPMp.value.name.substring(1);
         for (const piece of divPMp.content) {
-          this.markup.print(piece, divPMp.indent + "        ");
+          this.markup.print(piece, divPMp.indent + '        ');
         }
       } else {
         for (const piece of divPMp.content) {
-          this.markup.print(piece, divPMp.indent + "      ");
+          this.markup.print(piece, divPMp.indent + '      ');
         }
       }
     }

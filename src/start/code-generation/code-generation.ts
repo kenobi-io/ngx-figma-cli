@@ -1,7 +1,7 @@
-import { map, catchError, mergeMap, concatMap } from "rxjs/operators";
-import { of, forkJoin } from "rxjs";
-import fetch from "node-fetch";
-import * as fs from "fs";
+import { map, catchError, mergeMap, concatMap } from 'rxjs/operators';
+import { of, forkJoin } from 'rxjs';
+import fetch from 'node-fetch';
+import * as fs from 'fs';
 
 import {
   LayoutStyle,
@@ -31,7 +31,7 @@ import {
   LayoutConstraints,
   LayoutParamStyle,
   RectangleFigma,
-} from "../../core";
+} from '../../core';
 
 export class CodeGeneration {
   private layoutStyle: LayoutSetStyle;
@@ -42,6 +42,8 @@ export class CodeGeneration {
   private paragraphSetMarkup: ParagraphSetMarkup;
   private divSetMarkup: DivSetMarkup;
   private api: RestApiService;
+  private vectorList;
+  private vectorMap;
 
   constructor() {
     const style = new Style();
@@ -57,25 +59,26 @@ export class CodeGeneration {
   }
 
   public generate(result: any, codeGen?: CodeGeneration): void {
-    // result files request
-    const vectorList: any[] = [];
-    const vectorMap = {};
+    this.vectorList = [];
+    this.vectorMap = {};
     let responses;
     let data = result;
     const doc = data.document;
     const canvas = doc.children[0];
     const div = {} as DivParamMarkup;
     div.codeGen = codeGen;
-    for (let i = 0; i < canvas.children.length; i++) {
-      const child = canvas.children[i];
-      console.log(`name is ${child.name} and id: `, child.id);
-      if (child.name.charAt(0) === "#" && child.visible !== false) {
-        const child = canvas.children[i];
-        this.preprocessTree(child, vectorList, vectorMap);
+    canvas.children.forEach((child) => {
+      // console.log(
+      //   `name is ${child.name} and canvas.children.length: `,
+      //   canvas.children.length
+      // );
+      if (child.name.charAt(0) === '#' && child.visible !== false) {
+        console.log('main child type: ', child.node);
+        this.preprocessTree(child);
       }
-    }
+    });
 
-    let guids = vectorList.join(",");
+    let guids = this.vectorList.join(',');
     let promises: unknown[] = [];
     let images;
 
@@ -84,7 +87,6 @@ export class CodeGeneration {
       .pipe(
         concatMap(async (res) => {
           data = res;
-          // const imageRes = []
           const imageJSON = data;
           images = imageJSON.images || {};
           if (images) {
@@ -113,7 +115,7 @@ export class CodeGeneration {
           for (let i = 0; i < responses.length; i++) {
             images[guids[i]] = responses[i]
               .toString()
-              .replace("<svg ", '<svg preserveAspectRatio="none" ');
+              .replace('<svg ', '<svg preserveAspectRatio="none" ');
           }
           return of(images);
         }),
@@ -129,9 +131,9 @@ export class CodeGeneration {
         for (let i = 0; i < canvas.children.length; i++) {
           const child = canvas.children[i];
 
-          if (child.name.charAt(0) === "#" && child.visible !== false) {
+          if (child.name.charAt(0) === '#' && child.visible !== false) {
             const child = canvas.children[i];
-            console.log("canvas.children.length: ", canvas.children.length);
+            // console.log('canvas.children.length: ', canvas.children.length);
             this.createComponent(child, images, componentMap, div);
           }
         }
@@ -144,21 +146,21 @@ export class CodeGeneration {
 
           if (!imported[name]) {
             contents += `import { ${name}Component } from './${name}.component';\n`;
-            components.push(name + "Component");
+            components.push(name + 'Component');
           }
           imported[name] = true;
         }
-        contents += "\n";
+        contents += '\n';
         contents += nextSection;
-        nextSection = "";
-        nextSection += "@NgModule({\n";
-        nextSection += "  imports: [ CommonModule, FormsModule ],\n";
-        nextSection += `  declarations: [ ${components.join(", ")} ],\n`;
-        nextSection += `  exports: [ ${components.join(", ")} ],\n`;
+        nextSection = '';
+        nextSection += '@NgModule({\n';
+        nextSection += '  imports: [ CommonModule, FormsModule ],\n';
+        nextSection += `  declarations: [ ${components.join(', ')} ],\n`;
+        nextSection += `  exports: [ ${components.join(', ')} ],\n`;
         nextSection += `})\n`;
         nextSection += `export class FigmaModule { }`;
         contents += nextSection;
-        const path = "./src/components/figma.module.ts";
+        const path = './src/components/figma.module.ts';
 
         // TODO: if file './src/components/figma.module.ts' does't exists.
         fs.writeFile(path, contents, (err: any) => {
@@ -175,24 +177,20 @@ export class CodeGeneration {
     return err;
   }
 
-  private preprocessTree(
-    node: {
-      name: string;
-      fills: any;
-      strokes: any;
-      blendMode: string | null;
-      type: any;
-      children: any[];
-      constraints: {
-        vertical: any;
-        horizontal: any;
-      };
-      id: string | number;
-    },
-    vectorList: any[],
-    vectorMap: any
-  ) {
-    let vectorsOnly = node.name.charAt(0) !== "#";
+  private preprocessTree(node: {
+    name: string;
+    fills: any;
+    strokes: any;
+    blendMode: string | null;
+    type: any;
+    children: any[];
+    constraints: {
+      vertical: any;
+      horizontal: any;
+    };
+    id: string | number;
+  }) {
+    let isVectorsOnly = node.name.charAt(0) !== '#';
     let vectorVConstraint = null;
     let vectorHConstraint = null;
 
@@ -200,39 +198,42 @@ export class CodeGeneration {
       this.paintsRequireRender(node.fills) ||
       this.paintsRequireRender(node.strokes) ||
       (node.blendMode != null &&
-        ["PASS_THROUGH", "NORMAL"].indexOf(node.blendMode) < 0)
+        ['PASS_THROUGH', 'NORMAL'].indexOf(node.blendMode) < 0)
     ) {
-      node.type = "VECTOR";
+      node.type = 'VECTOR';
     }
     const children =
-      node.children && node.children.filter((child) => child.visible !== false);
+      node.children &&
+      node.children.filter((child) => {
+        // console.log(`child.visible !== false: ${child.visible !== false}`);
+        return child.visible !== false;
+      });
 
-    if (children) {
-      for (let j = 0; j < children.length; j++) {
-        if (Object.values(Vectors).includes(children[j].type)) {
-          vectorsOnly = false;
+    children &&
+      children.forEach((child) => {
+        if (Object.values(Vectors).indexOf(child.type) < 0) {
+          isVectorsOnly = false;
         } else {
           if (
             vectorVConstraint != null &&
-            children[j].constraints.vertical != vectorVConstraint
+            child.constraints.vertical != vectorVConstraint
           ) {
-            vectorsOnly = false;
+            isVectorsOnly = false;
           }
           if (
             vectorHConstraint != null &&
-            children[j].constraints.horizontal != vectorHConstraint
+            child.constraints.horizontal != vectorHConstraint
           ) {
-            vectorsOnly = false;
+            isVectorsOnly = false;
           }
-          vectorVConstraint = children[j].constraints.vertical;
-          vectorHConstraint = children[j].constraints.horizontal;
+          vectorVConstraint = child.constraints.vertical;
+          vectorHConstraint = child.constraints.horizontal;
         }
-      }
-    }
+      });
     node.children = children;
 
-    if (children && children.length > 0 && vectorsOnly) {
-      node.type = "VECTOR";
+    if (children && children.length > 0 && isVectorsOnly) {
+      node.type = 'VECTOR';
       node.constraints = {
         vertical: vectorVConstraint,
         horizontal: vectorHConstraint,
@@ -240,15 +241,16 @@ export class CodeGeneration {
     }
 
     if (Object.values(Vectors).includes(node.type)) {
-      node.type = "VECTOR";
-      vectorMap[node.id] = node;
-      vectorList.push(node.id);
+      node.type = 'VECTOR';
+      this.vectorMap[node.id] = node;
+      this.vectorList.push(node.id);
       node.children = [];
     }
 
     if (node.children) {
       for (const child of node.children) {
-        this.preprocessTree(child, vectorList, vectorMap);
+        console.log('child type: ', child.node);
+        this.preprocessTree(child);
       }
     }
   }
@@ -263,7 +265,7 @@ export class CodeGeneration {
         continue;
       }
       numPaints++;
-      if (paint.type === "EMOJI") {
+      if (paint.type === 'EMOJI') {
         return true;
       }
     }
@@ -277,8 +279,8 @@ export class CodeGeneration {
     componentMap: any,
     div?: DivParamMarkup
   ) {
-    const name = "C" + component.name.replace(/\W+/g, "");
-    const instance = name + component.id.replace(";", "S").replace(":", "D");
+    const name = 'C' + component.name.replace(/\W+/g, '');
+    const instance = name + component.id.replace(';', 'S').replace(':', 'D');
     const path = `src/components/${name}.component.ts`;
 
     if (!fs.existsSync(path)) {
@@ -302,8 +304,8 @@ export class CodeGeneration {
     div.component = component;
     div.imgMap = imagesMap;
     div.componentMap = componentMap;
-    console.log("visitNode call");
-    this.visitNode(component, null, null, "  ", div);
+    // console.log('visitNode call');
+    this.visitNode(component, null, null, '  ', div);
 
     const htmPath = `src/components/${name}.component.html`;
     fs.writeFile(htmPath, this.divSetMarkup.markup.document, (err: any) => {
@@ -365,21 +367,23 @@ export class CodeGeneration {
     const paragraphParamMarkup = {} as ParagraphParamMarkup;
     paragraphParamMarkup.content = content;
     paragraphParamMarkup.fontSetStyle = this.fontStyle;
+    paragraphParamMarkup.value = node;
     div.value = node;
+    div.content = content;
     div.value.id = node.id;
     div.indent = indent;
     div.minChildren = minChildren as any;
     div.centerChildren = centerChildren as any;
     div.maxChildren = maxChildren as any;
-    div.outerClass = "outerDiv";
-    layoutParam.outerClass = "outerDiv";
+    div.outerClass = 'outerDiv';
+    layoutParam.outerClass = 'outerDiv';
     layoutParam.outerStyle = {} as Style;
     div.outerStyle = layoutParam.outerStyle;
-    div.innerClass = "innerDiv";
+    div.innerClass = 'innerDiv';
     const cHorizontal = node.constraints && node.constraints.horizontal;
     const cVertical = node.constraints && node.constraints.vertical;
 
-    console.log("node type: ", node.type);
+    // console.log('node type: ', node.type);
     if (node.order) {
       layoutParam.outerStyle.zIndex = node.order;
     }
@@ -390,7 +394,7 @@ export class CodeGeneration {
     this.layoutStyle.invoke(cVertical, layoutParam); // +
     node.style = this.layoutStyle.style;
     div.style = node.style;
-    // console.log("node style", node.style);
+    // console.log('node.type: ', node.type);
     // ---
     // --- FRAME, RECTANGLE, INSTANCE, COMPONENT
     if (
@@ -398,11 +402,13 @@ export class CodeGeneration {
       node.type === Nodes.INSTANCE ||
       node.type === Nodes.COMPONENT
     ) {
+      // console.log('Nodes.FRAME: ', node.type);
       this.backgroundStyle.style.backgroundColor =
         this.backgroundStyle.style.colorToString(node.backgroundColor);
       node.style.backgroundColor = this.backgroundStyle.style.backgroundColor;
     } else if (node.type === Nodes.RECTANGLE) {
       // --- --- SOLID
+      // console.log('Nodes.RECTANGLE');
       const lastFill = this.backgroundStyle.style.lastPaint(
         (node as RectangleFigma).fills
       );
@@ -417,6 +423,7 @@ export class CodeGeneration {
       this.strokeStyle.invoke(node.type, { value: node }); // +
     } else if (node.type === Nodes.TEXT) {
       // --- TEXT
+      // console.log('Nodes.TEXT');
       this.backgroundStyle.invoke(node.type, { value: node });
       this.fontStyle.style = node.style;
       this.fontStyle.invoke(node.type, { value: node.style });
@@ -435,7 +442,6 @@ export class CodeGeneration {
   ) {
     const children = node.children;
     let added = offset;
-    console.log("EX node.children: ", node.children);
     if (children) {
       for (let i = 0; i < children.length; i++) {
         const child = children[i];
