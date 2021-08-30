@@ -168,7 +168,6 @@ export class DivMarkup implements DivSetMarkup {
       this.markup.print(`        </div>`, divPMp.indent);
       this.markup.print(`      </div>`, divPMp.indent);
     }
-
     if (divPMp.content != null) {
       console.log('content: != null');
       if (divPMp.value.name.charAt(0) === '$') {

@@ -16,6 +16,8 @@ import { CodeGeneration } from './code-generation/code-generation';
 import { FilesRequest, RestApiService } from '../core';
 import { Schema } from './schema';
 
+import { main } from './code-generation/common';
+
 export default function (options?: Schema): Rule {
   const rule = chain([
     (_tree: Tree, context: SchematicContext) => {
@@ -26,8 +28,12 @@ export default function (options?: Schema): Rule {
         .get(FilesRequest, context)
         .pipe(take(1))
         .subscribe((result: any) => {
-          const cg = new CodeGeneration();
-          cg.generate(result, cg);
+          // const cg = new CodeGeneration();
+          // cg.generate(result, cg);
+          main(result).catch((err) => {
+            console.error(err);
+            console.error(err.stack);
+          });
         });
     },
     // mergeWith(apply(url('./files/components'), [

@@ -1,6 +1,5 @@
-import { map, catchError, mergeMap, concatMap } from 'rxjs/operators';
-import { of, forkJoin } from 'rxjs';
-import fetch from 'node-fetch';
+import { catchError, concatMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 import * as fs from 'fs';
 
 import {
@@ -326,7 +325,6 @@ export class CodeGeneration {
     indent?: any,
     div?: DivParamMarkup
   ) {
-    let content = null;
     node.style = {};
     let minChildren = [];
     const maxChildren = [];
@@ -334,7 +332,6 @@ export class CodeGeneration {
     let bounds: Partial<Style> = null;
     const layoutParam: LayoutParamStyle = {} as LayoutParamStyle;
     let nodeBounds = null;
-    layoutParam.value = bounds as Style;
 
     if (parent != null) {
       nodeBounds = node.absoluteBoundingBox;
@@ -356,6 +353,7 @@ export class CodeGeneration {
         height: nodeBounds.height,
       };
     }
+    layoutParam.value = bounds as Style;
     this.expandChildren(
       node,
       parent,
@@ -365,11 +363,11 @@ export class CodeGeneration {
       0
     );
     const paragraphParamMarkup = {} as ParagraphParamMarkup;
-    paragraphParamMarkup.content = content;
+    paragraphParamMarkup.content = null;
     paragraphParamMarkup.fontSetStyle = this.fontStyle;
     paragraphParamMarkup.value = node;
     div.value = node;
-    div.content = content;
+    div.content = null;
     div.value.id = node.id;
     div.indent = indent;
     div.minChildren = minChildren as any;
@@ -429,12 +427,13 @@ export class CodeGeneration {
       this.fontStyle.invoke(node.type, { value: node.style });
       this.paragraphSetMarkup.invoke(node.type, paragraphParamMarkup);
     }
+    div.content = paragraphParamMarkup.content;
     this.divSetMarkup.invoke(node.type, div);
   }
 
   private expandChildren(
     node: any,
-    parent: null,
+    parent: any,
     minChildren: any[],
     maxChildren: any[],
     centerChildren: any[],
