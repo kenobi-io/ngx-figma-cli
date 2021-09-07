@@ -1,8 +1,8 @@
-import { Style } from "../style";
-import { LayoutParamStyle } from "./layout-param-style";
-import { LayoutSetStyle } from "./layout-set-style";
-import { LayoutConstraints } from "../../api";
-import { InnerArrow } from "src/core/inner-arrow";
+import { Style } from '../style';
+import { LayoutParamStyle } from './layout-param-style';
+import { LayoutSetStyle } from './layout-set-style';
+import { LayoutConstraints } from '../../api';
+import { InnerArrow } from 'src/core/inner-arrow';
 
 export class LayoutStyle implements LayoutSetStyle {
   public style: Partial<Style>;
@@ -54,9 +54,9 @@ export class LayoutStyle implements LayoutSetStyle {
       this.vertical(lps);
     } else {
       if (lps.value !== null) {
-        this.style.marginLeft = lps.value.left + "px";
-        this.style.marginRight = lps.value.right + "px";
-        this.style.flexGrow = "1";
+        this.style.marginLeft = lps.value.left + 'px';
+        this.style.marginRight = lps.value.right + 'px';
+        this.style.flexGrow = '1';
       }
     }
   }
@@ -73,19 +73,19 @@ export class LayoutStyle implements LayoutSetStyle {
     if (lps.isVertical) {
       this.vertical(lps);
     } else {
-      lps.outerStyle.justifyContent = "flex-end";
+      lps.outerStyle.justifyContent = 'flex-end';
       if (lps.value !== null) {
-        this.style.marginRight = lps.value.right + "px";
-        this.style.width = lps.value.width + "px";
-        this.style.minWidth = lps.value.width + "px";
+        this.style.marginRight = lps.value.right + 'px';
+        this.style.width = lps.value.width + 'px';
+        this.style.minWidth = lps.value.width + 'px';
       }
     }
   }
 
   private scale(lps: LayoutParamStyle) {
     if (lps.isVertical) {
-      lps.outerClass += " centerer";
-
+      lps.outerClass += ' centerer';
+      console.log('outerClass1: ', lps.outerClass);
       if (lps.value !== null) {
         const parentHeight =
           Number.parseFloat(lps.value.top) +
@@ -116,20 +116,19 @@ export class LayoutStyle implements LayoutSetStyle {
 
   private center(lps: LayoutParamStyle) {
     if (lps.isVertical) {
-      lps.outerClass += " centerer";
-      lps.outerStyle.alignItems = "center";
-
+      lps.outerClass += ' centerer';
+      lps.outerStyle.alignItems = 'center';
       if (lps.value !== null) {
         this.style.marginTop = `${
           Number.parseFloat(lps.value.top) - Number.parseFloat(lps.value.bottom)
         }`;
-        this.style.marginTop += "px";
+        this.style.marginTop += 'px';
       }
     } else {
-      lps.outerStyle.justifyContent = "center";
+      lps.outerStyle.justifyContent = 'center';
 
       if (lps.value !== null) {
-        this.style.width = lps.value.width + "px";
+        this.style.width = lps.value.width + 'px';
         this.style.marginLeft =
           lps.value.left && lps.value.right
             ? `${
@@ -137,7 +136,7 @@ export class LayoutStyle implements LayoutSetStyle {
                 Number.parseFloat(lps.value.right)
               }`
             : null;
-        this.style.marginLeft += "px";
+        this.style.marginLeft += 'px';
       }
     }
   }
@@ -152,14 +151,14 @@ export class LayoutStyle implements LayoutSetStyle {
 
   private bottomTop(lps: LayoutParamStyle) {
     if (lps.isVertical) {
-      if (lps.value !== null && lps.value) {
-        this.style.height = lps.value.height + "px";
-      }
-      lps.outerClass += " centerer";
+      // if (lps.value && lps.value.height && cVertical !== 'TOP_BOTTOM') {
+      //   this.style.height = lps.value.height + 'px';
+      // } // TODO: replace in common place bacaouse cVertical !== 'TOP_BOTTOM'
+      lps.outerClass += ' centerer';
 
       if (lps.value !== null) {
-        this.style.marginTop = lps.value.top + "px";
-        this.style.marginBottom = lps.value.bottom + "px";
+        this.style.marginTop = lps.value.top + 'px';
+        this.style.marginBottom = lps.value.bottom + 'px';
       }
     } else {
       this.horizontal(lps);
@@ -176,8 +175,8 @@ export class LayoutStyle implements LayoutSetStyle {
 
   private vertical(lps: LayoutParamStyle) {
     if (lps.value !== null) {
-      this.style.marginTop = lps.value.top + "px";
-      this.style.marginBottom = lps.value.bottom + "px";
+      this.style.marginTop = lps.value.top + 'px';
+      this.style.marginBottom = lps.value.bottom + 'px';
       this.style.minHeight = this.style.height;
       this.style.height = null;
     }
@@ -185,9 +184,9 @@ export class LayoutStyle implements LayoutSetStyle {
 
   private horizontal(lps: LayoutParamStyle) {
     if (lps.value !== null) {
-      this.style.marginLeft = lps.value.left + "px";
-      this.style.width = lps.value.width + "px";
-      this.style.minWidth = lps.value.width + "px";
+      this.style.marginLeft = lps.value.left + 'px';
+      this.style.width = lps.value.width + 'px';
+      this.style.minWidth = lps.value.width + 'px';
     }
   }
 }

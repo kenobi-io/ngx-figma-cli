@@ -28,16 +28,11 @@ import {
   RectangleFigma,
 } from '../../core';
 import { catchError, concatMap } from 'rxjs/operators';
-import { of } from 'rxjs';
-import { createComponent, colorString } from './figma.common';
+import { createComponent } from './figma.common';
 
-// require('dotenv').config()
 const fetch = require('node-fetch');
 const fs = require('fs');
-// const figma = require('./lib/figma');
 
-// const headers = new fetch.Headers();
-const componentList = [];
 let devToken =
   process.env.DEV_TOKEN || '203090-63cd909a-5ce6-4370-8b53-e19f27becaa8';
 
@@ -49,11 +44,6 @@ if (process.argv.length < 3) {
 if (process.argv.length > 3) {
   devToken = process.argv[3];
 }
-
-// headers.append('X-Figma-Token', devToken);
-
-// const fileKey = process.argv[2];
-// const baseUrl = 'https://api.figma.com';
 
 const vectorMap = {};
 const vectorList = [];
@@ -127,7 +117,6 @@ function preprocessTree(node) {
 
   if (node.children) {
     for (const child of node.children) {
-      console.log('child type: ', child.node);
       preprocessTree(child);
     }
   }
@@ -139,20 +128,17 @@ function errHandler(err: any) {
 }
 
 export async function main(result) {
-  //   let resp = await fetch(`${baseUrl}/v1/files/${fileKey}`, { headers });
+  console.log('==========================================');
   let resp = result;
-  //   let data = await resp.json();
   let data = resp;
 
   const doc = data.document;
   const canvas = doc.children[0];
-  let html = '';
 
   for (let i = 0; i < canvas.children.length; i++) {
     const child = canvas.children[i];
     if (child.name.charAt(0) === '#' && child.visible !== false) {
       const child = canvas.children[i];
-      console.log('main child type: ', child.node);
       preprocessTree(child);
     }
   }
@@ -238,83 +224,4 @@ export async function main(result) {
         console.log(`wrote ${path}`);
       });
     });
-  //   data = await fetch(
-  //     `${baseUrl}/v1/images/${fileKey}?ids=${guids}&format=svg`,
-  //     { headers }
-  //   );
-  //   const imageJSON = await data.json();
-
-  //   const images = imageJSON.images || {};
-  //   if (images) {
-  //     let promises = [];
-  //     let guids = [];
-  //     for (const guid in images) {
-  //       if (images[guid] == null) continue;
-  //       guids.push(guid);
-  //       promises.push(fetch(images[guid]));
-  //     }
-
-  //     let responses = await Promise.all(promises);
-  //     promises = [];
-  //     for (const resp of responses) {
-  //       promises.push(resp.text());
-  //     }
-
-  //     responses = await Promise.all(promises);
-  //     for (let i = 0; i < responses.length; i++) {
-  //       images[guids[i]] = responses[i].replace(
-  //         '<svg ',
-  //         '<svg preserveAspectRatio="none" '
-  //       );
-  //     }
-  //   }
-
-  //   const componentMap = {};
-  //   let contents = `import { NgModule } from '@angular/core';\n`;
-  //   contents += `import { FormsModule } from '@angular/forms';\n`;
-  //   contents += `import { CommonModule } from '@angular/common';\n`;
-  //   let nextSection = ``;
-
-  //   for (let i = 0; i < canvas.children.length; i++) {
-  //     const child = canvas.children[i];
-  //     if (child.name.charAt(0) === '#' && child.visible !== false) {
-  //       const child = canvas.children[i];
-  //       figma.createComponent(child, images, componentMap);
-  //     }
-  //   }
-
-  //   const imported = {};
-  //   const components = [];
-  //   for (const key in componentMap) {
-  //     const component = componentMap[key];
-  //     const name = component.name;
-  //     if (!imported[name]) {
-  //       contents += `import { ${name}Component } from './${name}.component';\n`;
-  //       components.push(name + 'Component');
-  //     }
-  //     imported[name] = true;
-  //   }
-  //   contents += '\n';
-  //   contents += nextSection;
-  //   nextSection = '';
-
-  //   nextSection += '@NgModule({\n';
-  //   (nextSection += '  imports: [ CommonModule, FormsModule ],\n'),
-  //     (nextSection += `  declarations: [ ${components.join(', ')} ],\n`);
-  //   nextSection += `  exports: [ ${components.join(', ')} ],\n`;
-  //   nextSection += `})\n`;
-  //   nextSection += `export class FigmaModule { }`;
-
-  //   contents += nextSection;
-
-  //   const path = './src/components/figma.module.ts';
-  //   fs.writeFile(path, contents, function (err) {
-  //     if (err) console.log(err);
-  //     console.log(`wrote ${path}`);
-  //   });
 }
-
-// main().catch((err) => {
-//   console.error(err);
-//   console.error(err.stack);
-// });

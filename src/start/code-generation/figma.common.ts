@@ -1,3 +1,33 @@
+import {
+  LayoutStyle,
+  Style,
+  BackgroundStyle,
+  EffectStyle,
+  EffectSetStyle,
+  StrokeStyle,
+  BackgroundSetStyle,
+  LayoutSetStyle,
+  StrokeSetStyle,
+  FontSetStyle,
+  FontStyle,
+  ParagraphSetMarkup,
+  ParagraphMarkup,
+  Markup,
+  ParagraphParamMarkup,
+  Nodes,
+  DivSetMarkup,
+  DivMarkup,
+  DivParamMarkup,
+  RestApiService,
+  ImagesRequest,
+  ImageRequest,
+  Vectors,
+  Groups,
+  LayoutConstraints,
+  LayoutParamStyle,
+  RectangleFigma,
+} from '../../core';
+
 const fs = require('fs');
 
 const VECTOR_TYPES = ['VECTOR', 'LINE', 'REGULAR_POLYGON', 'ELLIPSE'];
@@ -143,16 +173,16 @@ export const createComponent = (component, imgMap, componentMap) => {
 
   if (!fs.existsSync(path)) {
     const componentSrc = `
-import { Component, Input } from '@angular/core';
+    import { Component, Input } from '@angular/core';
 
-@Component({
-  selector: 'app-${name}',
-  templateUrl: '${name}.component.html',
-})
-export class ${name}Component  {
-  @Input() props: any;
-}
-`;
+    @Component({
+      selector: 'app-${name}',
+      templateUrl: '${name}.component.html',
+    })
+    export class ${name}Component  {
+      @Input() props: any;
+    }
+    `;
     fs.writeFile(path, componentSrc, function (err) {
       if (err) console.log(err);
       console.log(`wrote ${path}`);
@@ -164,6 +194,9 @@ export class ${name}Component  {
   }
 
   const visitNode = (node, parent, lastVertical, indent) => {
+    const style = new Style();
+    const markup = new Markup();
+
     let content = null;
     let img = null;
     const styles = {} as any;
@@ -200,78 +233,28 @@ export class ${name}Component  {
     let innerClass = 'innerDiv';
     const cHorizontal = node.constraints && node.constraints.horizontal;
     const cVertical = node.constraints && node.constraints.vertical;
-    const outerStyle = {} as any;
+    let outerStyle = {} as any;
 
     if (node.order) {
       outerStyle.zIndex = node.order;
     }
 
-    if (cHorizontal === 'LEFT_RIGHT') {
-      if (bounds != null) {
-        styles.marginLeft = bounds.left + 'px';
-        styles.marginRight = bounds.right + 'px';
-        styles.flexGrow = 1;
-      }
-    } else if (cHorizontal === 'RIGHT') {
-      outerStyle.justifyContent = 'flex-end';
-      if (bounds != null) {
-        styles.marginRight = bounds.right + 'px';
-        styles.width = bounds.width + 'px';
-        styles.minWidth = bounds.width + 'px';
-      }
-    } else if (cHorizontal === 'CENTER') {
-      outerStyle.justifyContent = 'center';
-      if (bounds != null) {
-        styles.width = bounds.width + 'px';
-        styles.marginLeft =
-          bounds.left && bounds.right ? bounds.left - bounds.right : null;
-        styles.marginLeft += 'px';
-      }
-    } else if (cHorizontal === 'SCALE') {
-      if (bounds != null) {
-        const parentWidth = bounds.left + bounds.width + bounds.right;
-        styles.width = `${(bounds.width * 100) / parentWidth}%`;
-        styles.marginLeft = `${(bounds.left * 100) / parentWidth}%`;
-      }
-    } else {
-      if (bounds != null) {
-        styles.marginLeft = bounds.left + 'px';
-        styles.width = bounds.width + 'px';
-        styles.minWidth = bounds.width + 'px';
-      }
-    }
+    let layoutParamStyle: LayoutParamStyle = {
+      value: bounds,
+      outerStyle,
+      outerClass,
+      isVertical: false,
+    };
 
-    if (bounds && bounds.height && cVertical !== 'TOP_BOTTOM')
-      styles.height = bounds.height + 'px';
-    if (cVertical === 'TOP_BOTTOM') {
-      outerClass += ' centerer';
-      if (bounds != null) {
-        styles.marginTop = bounds.top + 'px';
-        styles.marginBottom = bounds.bottom + 'px';
-      }
-    } else if (cVertical === 'CENTER') {
-      outerClass += ' centerer';
-      outerStyle.alignItems = 'center';
-      if (bounds != null) {
-        styles.marginTop = bounds.top - bounds.bottom;
-        styles.marginTop += 'px';
-      }
-    } else if (cVertical === 'SCALE') {
-      outerClass += ' centerer';
-      if (bounds != null) {
-        const parentHeight = bounds.top + bounds.height + bounds.bottom;
-        styles.height = `${(bounds.height * 100) / parentHeight}%`;
-        styles.top = `${(bounds.top * 100) / parentHeight}%`;
-      }
-    } else {
-      if (bounds != null) {
-        styles.marginTop = bounds.top + 'px';
-        styles.marginBottom = bounds.bottom + 'px';
-        styles.minHeight = styles.height;
-        styles.height = null;
-      }
-    }
-
+    new LayoutStyle(style).invoke(cHorizontal, layoutParamStyle); // ??
+    layoutParamStyle.isVertical = true;
+    bounds = layoutParamStyle.value;
+    outerStyle = layoutParamStyle.outerStyle;
+    outerClass = layoutParamStyle.outerClass;
+    new LayoutStyle(style).invoke(cVertical, layoutParamStyle); // ??
+    bounds = layoutParamStyle.value;
+    outerStyle = layoutParamStyle.outerStyle;
+    outerClass = layoutParamStyle.outerClass;
     if (
       ['FRAME', 'RECTANGLE', 'INSTANCE', 'COMPONENT'].indexOf(node.type) >= 0
     ) {
@@ -356,7 +339,6 @@ export class ${name}Component  {
       applyFontStyle(styles, fontStyle);
 
       if (node.name.substring(0, 6) === 'input:') {
-        console.log('content: if input');
         content = [
           `<input key="${node.id}" type="text" placeholder="${
             node.characters
@@ -384,7 +366,6 @@ export class ${name}Component  {
             let varName;
             if (node.name.charAt(0) === '$') {
               varName = node.name.substring(1);
-              console.log('varName: ', varName);
             }
             if (varName) {
               para = `
@@ -398,7 +379,6 @@ export class ${name}Component  {
                 "'"
               )}" key="${key}">${para}</span>`
             );
-            console.log('ps: ', ps.length);
             para = '';
           }
         };
@@ -421,10 +401,8 @@ export class ${name}Component  {
           para += node.characters[i];
         }
         commitParagraph('end');
-        console.log('content: characterStyleOverrides');
         content = ps;
       } else {
-        console.log('content: else');
         content = node.characters
           .split('\n')
           .map((line, idx) => `<div key="${idx}">${line}</div>`);
@@ -467,8 +445,7 @@ export class ${name}Component  {
       createComponent(node, imgMap, componentMap);
     } else if (node.type === 'VECTOR') {
       // print html
-      console.log('imgMap: ', imgMap);
-      console.log('node.id: ', node.id);
+
       print(`<div class="vector">${imgMap[node.id]}</div>`, indent);
     } else {
       const newNodeBounds = node.absoluteBoundingBox;
@@ -506,9 +483,7 @@ export class ${name}Component  {
         print(`        </div>`, indent);
         print(`      </div>`, indent);
       }
-      // console.log('content: != null ? : ', content);
       if (content != null) {
-        console.log('content: != null');
         if (node.name.charAt(0) === '$') {
           const varName = node.name.substring(1);
           for (const piece of content) {

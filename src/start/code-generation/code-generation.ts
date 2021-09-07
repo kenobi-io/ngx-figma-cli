@@ -66,11 +66,8 @@ export class CodeGeneration {
     const canvas = doc.children[0];
     const div = {} as DivParamMarkup;
     div.codeGen = codeGen;
+
     canvas.children.forEach((child) => {
-      // console.log(
-      //   `name is ${child.name} and canvas.children.length: `,
-      //   canvas.children.length
-      // );
       if (child.name.charAt(0) === '#' && child.visible !== false) {
         console.log('main child type: ', child.node);
         this.preprocessTree(child);
@@ -132,7 +129,6 @@ export class CodeGeneration {
 
           if (child.name.charAt(0) === '#' && child.visible !== false) {
             const child = canvas.children[i];
-            // console.log('canvas.children.length: ', canvas.children.length);
             this.createComponent(child, images, componentMap, div);
           }
         }
