@@ -465,13 +465,13 @@ export class CodeGeneration {
         child.order = i + added;
 
         if (
-          child.constraints &&
-          child.constraints.vertical === LayoutConstraints.BOTTOM
+          child.constraints
+          // && child.constraints.vertical === LayoutConstraints.BOTTOM
         ) {
           maxChildren.push(child);
         } else if (
-          child.constraints &&
-          child.constraints.vertical === LayoutConstraints.TOP
+          child.constraints
+          // && child.constraints.vertical === LayoutConstraints.TOP
         ) {
           minChildren.push(child);
         } else {

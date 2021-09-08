@@ -194,12 +194,12 @@ export const createComponent = (component, imgMap, componentMap) => {
   }
 
   const visitNode = (node, parent, lastVertical, indent) => {
-    const style = new Style();
+    // const style = new Style();
     const markup = new Markup();
 
     let content = null;
     let img = null;
-    const styles = {} as any;
+    const styles = new Style();
     let minChildren = [];
     const maxChildren = [];
     const centerChildren = [];
@@ -246,12 +246,12 @@ export const createComponent = (component, imgMap, componentMap) => {
       isVertical: false,
     };
 
-    new LayoutStyle(style).invoke(cHorizontal, layoutParamStyle); // ??
+    new LayoutStyle(styles).invoke(cHorizontal, layoutParamStyle);
     layoutParamStyle.isVertical = true;
     bounds = layoutParamStyle.value;
     outerStyle = layoutParamStyle.outerStyle;
     outerClass = layoutParamStyle.outerClass;
-    new LayoutStyle(style).invoke(cVertical, layoutParamStyle); // ??
+    new LayoutStyle(styles).invoke(cVertical, layoutParamStyle);
     bounds = layoutParamStyle.value;
     outerStyle = layoutParamStyle.outerStyle;
     outerClass = layoutParamStyle.outerClass;

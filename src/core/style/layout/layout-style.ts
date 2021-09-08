@@ -1,8 +1,12 @@
 import { Style } from '../style';
 import { LayoutParamStyle } from './layout-param-style';
 import { LayoutSetStyle } from './layout-set-style';
-import { LayoutConstraints } from '../../api';
-import { InnerArrow } from 'src/core/inner-arrow';
+import {
+  HorizontalLayoutConstraints,
+  LayoutConstraints,
+  VerticalLayoutConstraints,
+} from '../../api';
+import { InnerArrow } from '../../inner-arrow';
 
 export class LayoutStyle implements LayoutSetStyle {
   public style: Partial<Style>;
@@ -17,9 +21,36 @@ export class LayoutStyle implements LayoutSetStyle {
   }
 
   public invoke(
-    layoutConstraint: LayoutConstraints,
+    layoutConstraint:
+      | LayoutConstraints
+      | HorizontalLayoutConstraints
+      | VerticalLayoutConstraints,
     layoutParamStyle: LayoutParamStyle
   ): void {
+    if (!layoutParamStyle.isVertical) {
+      const hor = Object.values(HorizontalLayoutConstraints).find(
+        (value) => value === layoutConstraint
+      );
+      if (
+        layoutParamStyle.value &&
+        layoutParamStyle.value.height &&
+        layoutConstraint !== LayoutConstraints.TOP_BOTTOM
+      ) {
+        this.style.height = layoutParamStyle.value.height + 'px';
+      }
+      if (!hor) {
+        this.horizontalDefault(layoutParamStyle);
+        return;
+      }
+    } else {
+      const ver = Object.values(VerticalLayoutConstraints).find(
+        (value) => value === layoutConstraint
+      );
+      if (!ver) {
+        this.verticalDefault(layoutParamStyle);
+        return;
+      }
+    }
     this.layoutMap.get(layoutConstraint).call(this, layoutParamStyle);
   }
 
@@ -27,9 +58,6 @@ export class LayoutStyle implements LayoutSetStyle {
     return new Map()
       .set(LayoutConstraints.LEFT_RIGHT, (param: LayoutParamStyle) =>
         this.leftRight(param)
-      )
-      .set(LayoutConstraints.LEFT, (param: LayoutParamStyle) =>
-        this.left(param)
       )
       .set(LayoutConstraints.RIGHT, (param: LayoutParamStyle) =>
         this.right(param)
@@ -42,50 +70,29 @@ export class LayoutStyle implements LayoutSetStyle {
       )
       .set(LayoutConstraints.TOP_BOTTOM, (param: LayoutParamStyle) =>
         this.bottomTop(param)
-      )
-      .set(LayoutConstraints.BOTTOM, (param: LayoutParamStyle) =>
-        this.bottom(param)
-      )
-      .set(LayoutConstraints.TOP, (param: LayoutParamStyle) => this.top(param));
+      );
   }
 
   private leftRight(lps: LayoutParamStyle) {
-    if (lps.isVertical) {
-      this.vertical(lps);
-    } else {
-      if (lps.value !== null) {
-        this.style.marginLeft = lps.value.left + 'px';
-        this.style.marginRight = lps.value.right + 'px';
-        this.style.flexGrow = '1';
-      }
-    }
-  }
-
-  private left(lps: LayoutParamStyle) {
-    if (lps.isVertical) {
-      this.vertical(lps);
-    } else {
-      this.horizontal(lps);
+    if (lps.value !== null) {
+      this.style.marginLeft = lps.value.left + 'px';
+      this.style.marginRight = lps.value.right + 'px';
+      this.style.flexGrow = 1;
     }
   }
 
   private right(lps: LayoutParamStyle) {
-    if (lps.isVertical) {
-      this.vertical(lps);
-    } else {
-      lps.outerStyle.justifyContent = 'flex-end';
-      if (lps.value !== null) {
-        this.style.marginRight = lps.value.right + 'px';
-        this.style.width = lps.value.width + 'px';
-        this.style.minWidth = lps.value.width + 'px';
-      }
+    lps.outerStyle.justifyContent = 'flex-end';
+    if (lps.value !== null) {
+      this.style.marginRight = lps.value.right + 'px';
+      this.style.width = lps.value.width + 'px';
+      this.style.minWidth = lps.value.width + 'px';
     }
   }
 
   private scale(lps: LayoutParamStyle) {
     if (lps.isVertical) {
       lps.outerClass += ' centerer';
-      console.log('outerClass1: ', lps.outerClass);
       if (lps.value !== null) {
         const parentHeight =
           Number.parseFloat(lps.value.top) +
@@ -141,52 +148,27 @@ export class LayoutStyle implements LayoutSetStyle {
     }
   }
 
-  private bottom(lps: LayoutParamStyle) {
-    if (lps.isVertical) {
-      this.vertical(lps);
-    } else {
-      this.horizontal(lps);
-    }
-  }
-
   private bottomTop(lps: LayoutParamStyle) {
-    if (lps.isVertical) {
-      // if (lps.value && lps.value.height && cVertical !== 'TOP_BOTTOM') {
-      //   this.style.height = lps.value.height + 'px';
-      // } // TODO: replace in common place bacaouse cVertical !== 'TOP_BOTTOM'
-      lps.outerClass += ' centerer';
+    lps.outerClass += ' centerer';
 
-      if (lps.value !== null) {
-        this.style.marginTop = lps.value.top + 'px';
-        this.style.marginBottom = lps.value.bottom + 'px';
-      }
-    } else {
-      this.horizontal(lps);
-    }
-  }
-
-  private top(lps: LayoutParamStyle) {
-    if (lps.isVertical) {
-      this.vertical(lps);
-    } else {
-      this.horizontal(lps);
-    }
-  }
-
-  private vertical(lps: LayoutParamStyle) {
     if (lps.value !== null) {
       this.style.marginTop = lps.value.top + 'px';
       this.style.marginBottom = lps.value.bottom + 'px';
-      this.style.minHeight = this.style.height;
-      this.style.height = null;
     }
   }
-
-  private horizontal(lps: LayoutParamStyle) {
+  private horizontalDefault(lps: LayoutParamStyle) {
     if (lps.value !== null) {
       this.style.marginLeft = lps.value.left + 'px';
       this.style.width = lps.value.width + 'px';
       this.style.minWidth = lps.value.width + 'px';
+    }
+  }
+  private verticalDefault(lps: LayoutParamStyle) {
+    if (lps.value !== null) {
+      this.style.marginTop = lps.value.top + 'px';
+      this.style.marginBottom = lps.value.bottom + 'px';
+      this.style.minHeight = lps.value.height;
+      this.style.height = null;
     }
   }
 }

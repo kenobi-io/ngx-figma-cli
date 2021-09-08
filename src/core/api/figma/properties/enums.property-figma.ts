@@ -181,13 +181,23 @@ export enum EasingTypes {
 }
 
 export enum LayoutConstraints {
-  TOP = 'TOP',
-  BOTTOM = 'BOTTOM',
-  TOP_BOTTOM = 'TOP_BOTTOM',
-  LEFT = 'LEFT',
+  LEFT_RIGHT = 'LEFT_RIGHT',
   RIGHT = 'RIGHT',
   CENTER = 'CENTER',
+  SCALE = 'SCALE',
+  TOP_BOTTOM = 'TOP_BOTTOM',
+}
+
+export enum HorizontalLayoutConstraints {
   LEFT_RIGHT = 'LEFT_RIGHT',
+  RIGHT = 'RIGHT',
+  CENTER = 'CENTER',
+  SCALE = 'SCALE',
+}
+
+export enum VerticalLayoutConstraints {
+  TOP_BOTTOM = 'TOP_BOTTOM',
+  CENTER = 'CENTER',
   SCALE = 'SCALE',
 }
 
