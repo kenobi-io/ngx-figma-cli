@@ -199,7 +199,7 @@ export const createComponent = (component, imgMap, componentMap) => {
 
     let content = null;
     let img = null;
-    const styles = new Style();
+    const styles = new Style(); // TODO: styles rename to style
     let minChildren = [];
     const maxChildren = [];
     const centerChildren = [];
@@ -255,158 +255,129 @@ export const createComponent = (component, imgMap, componentMap) => {
     bounds = layoutParamStyle.value;
     outerStyle = layoutParamStyle.outerStyle;
     outerClass = layoutParamStyle.outerClass;
+    const backgroundStyle = new BackgroundStyle(styles);
+    const effectStyle = new EffectStyle(styles);
+    const strokeStyle = new StrokeStyle(styles);
+    const fontStyle = new FontStyle(node.style);
+    const paragraphSetMarkup = new ParagraphMarkup(markup);
+    const paragraphParamMarkup = {
+      content: null,
+      fontSetStyle: fontStyle,
+      value: node,
+      para: '',
+      styleCache: {},
+      currStyle: 0,
+      ps: [],
+    } as ParagraphParamMarkup;
+
     if (
-      ['FRAME', 'RECTANGLE', 'INSTANCE', 'COMPONENT'].indexOf(node.type) >= 0
+      node.type === Nodes.FRAME ||
+      node.type === Nodes.INSTANCE ||
+      node.type === Nodes.COMPONENT
     ) {
-      if (['FRAME', 'COMPONENT', 'INSTANCE'].indexOf(node.type) >= 0) {
-        styles.backgroundColor = colorString(node.backgroundColor);
-        if (node.clipsContent) styles.overflow = 'hidden';
-      } else if (node.type === 'RECTANGLE') {
-        const lastFill = getPaint(node.fills);
-        if (lastFill) {
-          if (lastFill.type === 'SOLID') {
-            styles.backgroundColor = colorString(lastFill.color);
-            styles.opacity = lastFill.opacity;
-          } else if (lastFill.type === 'IMAGE') {
-            styles.backgroundImage = imageURL(lastFill.imageRef);
-            styles.backgroundSize = backgroundSize(lastFill.scaleMode);
-          } else if (lastFill.type === 'GRADIENT_LINEAR') {
-            styles.background = paintToLinearGradient(lastFill);
-          } else if (lastFill.type === 'GRADIENT_RADIAL') {
-            styles.background = paintToRadialGradient(lastFill);
-          }
-        }
-
-        if (node.effects) {
-          for (let i = 0; i < node.effects.length; i++) {
-            const effect = node.effects[i];
-            if (effect.type === 'DROP_SHADOW') {
-              styles.boxShadow = dropShadow(effect);
-            } else if (effect.type === 'INNER_SHADOW') {
-              styles.boxShadow = innerShadow(effect);
-            } else if (effect.type === 'LAYER_BLUR') {
-              styles.filter = `blur(${effect.radius}px)`;
-            }
-          }
-        }
-
-        const lastStroke = getPaint(node.strokes);
-        if (lastStroke) {
-          if (lastStroke.type === 'SOLID') {
-            const weight = node.strokeWeight || 1;
-            styles.border = `${weight}px solid ${colorString(
-              lastStroke.color
-            )}`;
-          }
-        }
-
-        const cornerRadii = node.rectangleCornerRadii;
-        if (
-          cornerRadii &&
-          cornerRadii.length === 4 &&
-          cornerRadii[0] + cornerRadii[1] + cornerRadii[2] + cornerRadii[3] > 0
-        ) {
-          styles.borderRadius = `${cornerRadii[0]}px ${cornerRadii[1]}px ${cornerRadii[2]}px ${cornerRadii[3]}px`;
-        }
+      backgroundStyle.invoke(node.type, { value: node });
+    } else if (node.type === Nodes.RECTANGLE) {
+      const lastFill = backgroundStyle.style.lastPaint(
+        (node as RectangleFigma).fills
+      );
+      backgroundStyle.invoke(lastFill.type, { value: node });
+      for (let effect of node.effects) {
+        effectStyle.invoke(effect.type, { value: effect });
       }
+      strokeStyle.invoke(node.type, { value: node });
     } else if (node.type === 'TEXT') {
-      const lastFill = getPaint(node.fills);
-      if (lastFill) {
-        styles.color = colorString(lastFill.color);
-      }
-
-      const lastStroke = getPaint(node.strokes);
-      if (lastStroke) {
-        const weight = node.strokeWeight || 1;
-        styles.WebkitTextStroke = `${weight}px ${colorString(
-          lastStroke.color
-        )}`;
-      }
-
-      const fontStyle = node.style;
-
-      const applyFontStyle = (_styles, fontStyle) => {
-        if (fontStyle) {
-          _styles.fontSize = fontStyle.fontSize + 'px';
-          _styles.fontWeight = fontStyle.fontWeight;
-          _styles.fontFamily = fontStyle.fontFamily;
-          _styles.textAlign = fontStyle.textAlignHorizontal;
-          _styles.fontStyle = fontStyle.italic ? 'italic' : 'normal';
-          _styles.lineHeight = `${fontStyle.lineHeightPercent * 1.25}%`;
-          _styles.letterSpacing = `${fontStyle.letterSpacing}px`;
-        }
-      };
-      applyFontStyle(styles, fontStyle);
-
-      if (node.name.substring(0, 6) === 'input:') {
-        content = [
-          `<input key="${node.id}" type="text" placeholder="${
-            node.characters
-          }" name="${node.name.substring(7)}" />`,
-        ];
-      } else if (node.characterStyleOverrides) {
-        let para = '';
-        const ps = [];
-        const styleCache = {};
-        let currStyle = 0;
-
-        const commitParagraph = (key) => {
-          if (para !== '') {
-            if (styleCache[currStyle] == null && currStyle !== 0) {
-              styleCache[currStyle] = {};
-              applyFontStyle(
-                styleCache[currStyle],
-                node.styleOverrideTable[currStyle]
-              );
-            }
-
-            const styleOverride = styleCache[currStyle]
-              ? JSON.stringify(styleCache[currStyle])
-              : '{}';
-            let varName;
-            if (node.name.charAt(0) === '$') {
-              varName = node.name.substring(1);
-            }
-            if (varName) {
-              para = `
-            <ng-container *ngIf="props?.${varName}">{{props.${varName}}}</ng-container>
-            <ng-container *ngIf="!props?.${varName}">${para}</ng-container>
-            `;
-            }
-            ps.push(
-              `<span [ngStyle]="${styleOverride.replace(
-                /"/g,
-                "'"
-              )}" key="${key}">${para}</span>`
-            );
-            para = '';
-          }
-        };
-
-        for (const i in node.characters) {
-          let idx = node.characterStyleOverrides[i];
-
-          if (node.characters[i] === '\n') {
-            commitParagraph(i);
-            ps.push(`<br key="${`br${i}`}" />`);
-            continue;
-          }
-
-          if (idx == null) idx = 0;
-          if (idx !== currStyle) {
-            commitParagraph(i);
-            currStyle = idx;
-          }
-
-          para += node.characters[i];
-        }
-        commitParagraph('end');
-        content = ps;
-      } else {
-        content = node.characters
-          .split('\n')
-          .map((line, idx) => `<div key="${idx}">${line}</div>`);
-      }
+      backgroundStyle.invoke(node.type, { value: node });
+      fontStyle.style = node.style;
+      fontStyle.invoke(node.type, { value: node.style });
+      paragraphSetMarkup.invoke(node.type, paragraphParamMarkup);
+      // const lastFill = getPaint(node.fills);
+      // if (lastFill) {
+      //   styles.color = colorString(lastFill.color);
+      // }
+      // const lastStroke = getPaint(node.strokes);
+      // if (lastStroke) {
+      //   const weight = node.strokeWeight || 1;
+      //   styles.WebkitTextStroke = `${weight}px ${colorString(
+      //     lastStroke.color
+      //   )}`;
+      // }
+      // // const fontStyle = node.style;
+      // const applyFontStyle = (_styles, fontStyle) => {
+      //   if (fontStyle) {
+      //     _styles.fontSize = fontStyle.fontSize + 'px';
+      //     _styles.fontWeight = fontStyle.fontWeight;
+      //     _styles.fontFamily = fontStyle.fontFamily;
+      //     _styles.textAlign = fontStyle.textAlignHorizontal;
+      //     _styles.fontStyle = fontStyle.italic ? 'italic' : 'normal';
+      //     _styles.lineHeight = `${fontStyle.lineHeightPercent * 1.25}%`;
+      //     _styles.letterSpacing = `${fontStyle.letterSpacing}px`;
+      //   }
+      // };
+      // applyFontStyle(styles, fontStyle);
+      // if (node.name.substring(0, 6) === 'input:') {
+      //   content = [
+      //     `<input key="${node.id}" type="text" placeholder="${
+      //       node.characters
+      //     }" name="${node.name.substring(7)}" />`,
+      //   ];
+      // } else if (node.characterStyleOverrides) {
+      //   let para = '';
+      //   const ps = [];
+      //   const styleCache = {};
+      //   let currStyle = 0;
+      //   const commitParagraph = (key) => {
+      //     if (para !== '') {
+      //       if (styleCache[currStyle] == null && currStyle !== 0) {
+      //         styleCache[currStyle] = {};
+      //         applyFontStyle(
+      //           styleCache[currStyle],
+      //           node.styleOverrideTable[currStyle]
+      //         );
+      //       }
+      //       const styleOverride = styleCache[currStyle]
+      //         ? JSON.stringify(styleCache[currStyle])
+      //         : '{}';
+      //       let varName;
+      //       if (node.name.charAt(0) === '$') {
+      //         varName = node.name.substring(1);
+      //       }
+      //       if (varName) {
+      //         para = `
+      //       <ng-container *ngIf="props?.${varName}">{{props.${varName}}}</ng-container>
+      //       <ng-container *ngIf="!props?.${varName}">${para}</ng-container>
+      //       `;
+      //       }
+      //       ps.push(
+      //         `<span [ngStyle]="${styleOverride.replace(
+      //           /"/g,
+      //           "'"
+      //         )}" key="${key}">${para}</span>`
+      //       );
+      //       para = '';
+      //     }
+      //   };
+      //   for (const i in node.characters) {
+      //     let idx = node.characterStyleOverrides[i];
+      //     if (node.characters[i] === '\n') {
+      //       commitParagraph(i);
+      //       ps.push(`<br key="${`br${i}`}" />`);
+      //       continue;
+      //     }
+      //     if (idx == null) idx = 0;
+      //     if (idx !== currStyle) {
+      //       commitParagraph(i);
+      //       currStyle = idx;
+      //     }
+      //     para += node.characters[i];
+      //   }
+      //   commitParagraph('end');
+      //   content = ps;
+      // } else {
+      //   content = node.characters
+      //     .split('\n')
+      //     .map((line, idx) => `<div key="${idx}">${line}</div>`);
+      // }
+      content = paragraphParamMarkup.content;
     }
 
     function printDiv(styles, outerStyle, indent, nodeName = 'div') {

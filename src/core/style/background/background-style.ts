@@ -1,8 +1,8 @@
-import { Nodes, TypePaints, FrameFigma, RectangleFigma } from "../../api";
-import { Style } from "../style";
-import { BackgroundParamStyle } from "./param-bg-style";
-import { BackgroundSetStyle } from "./bg-set-style";
-import { InnerArrow } from "src/core/inner-arrow";
+import { Nodes, TypePaints, FrameFigma, RectangleFigma } from '../../api';
+import { Style } from '../style';
+import { BackgroundParamStyle } from './param-bg-style';
+import { BackgroundSetStyle } from './bg-set-style';
+import { InnerArrow } from 'src/core/inner-arrow';
 
 export class BackgroundStyle implements BackgroundSetStyle {
   public style: Partial<Style>;
@@ -44,8 +44,8 @@ export class BackgroundStyle implements BackgroundSetStyle {
     const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
     if (lastFill) {
       this.style.backgroundImage = this.style.imageUrl(lastFill.imageRef);
-      if (lastFill.scaleMode === "FILL") {
-        this.style.backgroundSize = "cover";
+      if (lastFill.scaleMode === 'FILL') {
+        this.style.backgroundSize = 'cover';
       } else {
         this.style.backgroundSize = undefined;
       }
@@ -56,7 +56,7 @@ export class BackgroundStyle implements BackgroundSetStyle {
     const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
     if (lastFill) {
       this.style.backgroundColor = this.style.colorToString(lastFill.color);
-      this.style.opacity = `${lastFill.opacity}`;
+      lastFill.opacity && (this.style.opacity = `${lastFill.opacity}`);
     }
   }
 
@@ -74,12 +74,12 @@ export class BackgroundStyle implements BackgroundSetStyle {
     }
   }
 
-  private fraComInst(bgP: BackgroundParamStyle): void {
+  private fraComInst(bgP: BackgroundParamStyle | any): void {
     this.style.backgroundColor = this.style.colorToString(
       (bgP.value as FrameFigma).backgroundColor
     );
     if ((bgP.value as FrameFigma).clipsContent) {
-      this.style.overflow = "hidden";
+      this.style.overflow = 'hidden';
     }
   }
 

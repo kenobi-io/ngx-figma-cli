@@ -26,74 +26,76 @@ export class ParagraphMarkup implements ParagraphSetMarkup {
 
   private commit(
     key: any,
-    para,
-    ps,
-    styleCache,
-    currStyle,
+    // para,
+    // ps,
+    // styleCache,
+    // currStyle,
     paragraph: ParagraphParamMarkup
-  ): [] {
-    if (para !== '') {
-      if (styleCache[currStyle] == null && currStyle !== 0) {
-        styleCache[currStyle] = {};
+  ): string[] {
+    if (paragraph.para !== '') {
+      if (
+        paragraph.styleCache[paragraph.currStyle] == null &&
+        paragraph.currStyle !== 0
+      ) {
+        paragraph.styleCache[paragraph.currStyle] = {};
         paragraph?.fontSetStyle.invoke(
-          styleCache[currStyle],
-          paragraph.value.styleOverrideTable[currStyle]
+          paragraph.styleCache[paragraph.currStyle],
+          paragraph.value.styleOverrideTable[paragraph.currStyle]
         );
       }
-      const styleOverride = styleCache[currStyle]
-        ? JSON.stringify(styleCache[currStyle])
+      const styleOverride = paragraph.styleCache[paragraph.currStyle]
+        ? JSON.stringify(paragraph.styleCache[paragraph.currStyle])
         : '{}';
       let varName;
 
       if (paragraph.value.name.charAt(0) === '$') {
         varName = paragraph.value.name.substring(1);
-        console.log('varName: ', varName);
+        // console.log('varName: ', varName);
       }
 
       if (varName) {
-        para = `
+        paragraph.para = `
           <ng-container *ngIf="props?.${varName}">{{props.${varName}}}</ng-container>
-          <ng-container *ngIf="!props?.${varName}">${para}</ng-container>
+          <ng-container *ngIf="!props?.${varName}">${paragraph.para}</ng-container>
           `;
       }
-      ps.push(
-        `<span [ngStyle]="${styleOverride.replace(
-          /"/g,
-          "'"
-        )}" key="${key}">${para}</span>`
+      paragraph.ps.push(
+        `<span [ngStyle]="${styleOverride.replace(/"/g, "'")}" key="${key}">${
+          paragraph.para
+        }</span>`
       );
-      console.log('ps: ', ps.length);
-      para = '';
+      // console.log('ps: ', ps.length);
+      paragraph.para = '';
     }
-    return ps;
+    return paragraph.ps;
   }
 
   private text(paragraph: ParagraphParamMarkup) {
     if (paragraph.value.name.substring(0, 6) === 'input:') {
-      console.log('content: if input');
+      // console.log('content: if input');
       paragraph.content = [
         `<input key="${paragraph.value.id}"` +
           `type="text" placeholder="${paragraph.value.characters}"` +
           ` name="${paragraph.value.name.substring(7)}" />`,
       ];
     } else if (paragraph.value.characterStyleOverrides) {
-      let para = '';
-      let ps = [];
-      let styleCache = {};
-      let currStyle = 0;
+      // let para = '';
+      // let ps = [];
+      // let styleCache = {};
+      // let currStyle = 0;
 
       for (const i in paragraph.value.characters) {
         let idx = paragraph.value.characterStyleOverrides[i];
         if (paragraph.value.characters[i] === '\n') {
           paragraph.content = this.commit(
             i,
-            para,
-            ps,
-            styleCache,
-            currStyle,
+            // paragraph.para,
+            // paragraph.ps,
+            // paragraph.styleCache,
+            // paragraph.currStyle,
             paragraph
           );
-          ps.push(`<br key="${`br${i}`}" />`);
+          paragraph.ps.push(`<br key="${`br${i}`}" />`);
           continue;
         }
 
@@ -101,31 +103,31 @@ export class ParagraphMarkup implements ParagraphSetMarkup {
           idx = 0;
         }
 
-        if (idx !== currStyle) {
+        if (idx !== paragraph.currStyle) {
           paragraph.content = this.commit(
             i,
-            para,
-            ps,
-            styleCache,
-            currStyle,
+            // para,
+            // ps,
+            // styleCache,
+            // currStyle,
             paragraph
           );
-          currStyle = idx;
+          paragraph.currStyle = idx;
         }
-        para += paragraph.value.characters[i];
+        paragraph.para += paragraph.value.characters[i];
       }
       paragraph.content = this.commit(
         'end',
-        para,
-        ps,
-        styleCache,
-        currStyle,
+        // para,
+        // ps,
+        // styleCache,
+        // currStyle,
         paragraph
       );
-      console.log('content: characterStyleOverrides');
+      // console.log('content: characterStyleOverrides');
       // paragraph.content = paragraph.ps;
     } else {
-      console.log('content: else');
+      // console.log('content: else');
       paragraph.content = paragraph.value.characters
         .split('\n')
         .map((line: any, idx: any) => `<div key="${idx}">${line}</div>`);

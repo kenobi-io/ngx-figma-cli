@@ -167,7 +167,7 @@ export class LayoutStyle implements LayoutSetStyle {
     if (lps.value !== null) {
       this.style.marginTop = lps.value.top + 'px';
       this.style.marginBottom = lps.value.bottom + 'px';
-      this.style.minHeight = lps.value.height;
+      this.style.minHeight = lps.value.height + 'px';
       this.style.height = null;
     }
   }
