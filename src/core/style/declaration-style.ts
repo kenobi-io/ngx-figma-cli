@@ -140,7 +140,7 @@ export abstract class DeclarationStyle {
   fontVariantLigatures: string;
   fontVariantNumeric: string;
   fontVariantPosition: string;
-  fontWeight: string;
+  fontWeight: string | number;
   gap: string;
   glyphOrientationVertical: string;
   grid: string;

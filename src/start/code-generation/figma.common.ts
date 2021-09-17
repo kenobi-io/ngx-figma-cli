@@ -258,7 +258,7 @@ export const createComponent = (component, imgMap, componentMap) => {
     const backgroundStyle = new BackgroundStyle(styles);
     const effectStyle = new EffectStyle(styles);
     const strokeStyle = new StrokeStyle(styles);
-    const fontStyle = new FontStyle(node.style);
+    const fontStyle = new FontStyle(styles);
     const paragraphSetMarkup = new ParagraphMarkup(markup);
     const paragraphParamMarkup = {
       content: null,
@@ -287,96 +287,8 @@ export const createComponent = (component, imgMap, componentMap) => {
       strokeStyle.invoke(node.type, { value: node });
     } else if (node.type === 'TEXT') {
       backgroundStyle.invoke(node.type, { value: node });
-      fontStyle.style = node.style;
       fontStyle.invoke(node.type, { value: node.style });
       paragraphSetMarkup.invoke(node.type, paragraphParamMarkup);
-      // const lastFill = getPaint(node.fills);
-      // if (lastFill) {
-      //   styles.color = colorString(lastFill.color);
-      // }
-      // const lastStroke = getPaint(node.strokes);
-      // if (lastStroke) {
-      //   const weight = node.strokeWeight || 1;
-      //   styles.WebkitTextStroke = `${weight}px ${colorString(
-      //     lastStroke.color
-      //   )}`;
-      // }
-      // // const fontStyle = node.style;
-      // const applyFontStyle = (_styles, fontStyle) => {
-      //   if (fontStyle) {
-      //     _styles.fontSize = fontStyle.fontSize + 'px';
-      //     _styles.fontWeight = fontStyle.fontWeight;
-      //     _styles.fontFamily = fontStyle.fontFamily;
-      //     _styles.textAlign = fontStyle.textAlignHorizontal;
-      //     _styles.fontStyle = fontStyle.italic ? 'italic' : 'normal';
-      //     _styles.lineHeight = `${fontStyle.lineHeightPercent * 1.25}%`;
-      //     _styles.letterSpacing = `${fontStyle.letterSpacing}px`;
-      //   }
-      // };
-      // applyFontStyle(styles, fontStyle);
-      // if (node.name.substring(0, 6) === 'input:') {
-      //   content = [
-      //     `<input key="${node.id}" type="text" placeholder="${
-      //       node.characters
-      //     }" name="${node.name.substring(7)}" />`,
-      //   ];
-      // } else if (node.characterStyleOverrides) {
-      //   let para = '';
-      //   const ps = [];
-      //   const styleCache = {};
-      //   let currStyle = 0;
-      //   const commitParagraph = (key) => {
-      //     if (para !== '') {
-      //       if (styleCache[currStyle] == null && currStyle !== 0) {
-      //         styleCache[currStyle] = {};
-      //         applyFontStyle(
-      //           styleCache[currStyle],
-      //           node.styleOverrideTable[currStyle]
-      //         );
-      //       }
-      //       const styleOverride = styleCache[currStyle]
-      //         ? JSON.stringify(styleCache[currStyle])
-      //         : '{}';
-      //       let varName;
-      //       if (node.name.charAt(0) === '$') {
-      //         varName = node.name.substring(1);
-      //       }
-      //       if (varName) {
-      //         para = `
-      //       <ng-container *ngIf="props?.${varName}">{{props.${varName}}}</ng-container>
-      //       <ng-container *ngIf="!props?.${varName}">${para}</ng-container>
-      //       `;
-      //       }
-      //       ps.push(
-      //         `<span [ngStyle]="${styleOverride.replace(
-      //           /"/g,
-      //           "'"
-      //         )}" key="${key}">${para}</span>`
-      //       );
-      //       para = '';
-      //     }
-      //   };
-      //   for (const i in node.characters) {
-      //     let idx = node.characterStyleOverrides[i];
-      //     if (node.characters[i] === '\n') {
-      //       commitParagraph(i);
-      //       ps.push(`<br key="${`br${i}`}" />`);
-      //       continue;
-      //     }
-      //     if (idx == null) idx = 0;
-      //     if (idx !== currStyle) {
-      //       commitParagraph(i);
-      //       currStyle = idx;
-      //     }
-      //     para += node.characters[i];
-      //   }
-      //   commitParagraph('end');
-      //   content = ps;
-      // } else {
-      //   content = node.characters
-      //     .split('\n')
-      //     .map((line, idx) => `<div key="${idx}">${line}</div>`);
-      // }
       content = paragraphParamMarkup.content;
     }
 
