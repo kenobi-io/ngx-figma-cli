@@ -162,8 +162,127 @@ function expandChildren(
 
   return added - offset;
 }
+let markup = new Markup();
+let divSetMarkup = new DivMarkup(markup);
 
-export const createComponent = (component, imgMap, componentMap) => {
+function visitNode(node, parent, lastVertical, indent, div?: DivParamMarkup) {
+  // const style = new Style();
+  // const markup = new Markup();
+
+  let content = null;
+  let img = null;
+  const styles = new Style(); // TODO: styles rename to style
+  let minChildren = [];
+  const maxChildren = [];
+  const centerChildren = [];
+  let bounds = null;
+  let nodeBounds = null;
+
+  if (parent != null) {
+    nodeBounds = node.absoluteBoundingBox;
+    const nx2 = nodeBounds.x + nodeBounds.width;
+    const ny2 = nodeBounds.y + nodeBounds.height;
+    const parentBounds = parent.absoluteBoundingBox;
+    const px = parentBounds.x;
+    const py = parentBounds.y;
+
+    bounds = {
+      left: nodeBounds.x - px,
+      right: px + parentBounds.width - nx2,
+      top:
+        lastVertical == null ? nodeBounds.y - py : nodeBounds.y - lastVertical,
+      bottom: py + parentBounds.height - ny2,
+      width: nodeBounds.width,
+      height: nodeBounds.height,
+    };
+  }
+
+  expandChildren(node, parent, minChildren, maxChildren, centerChildren, 0);
+
+  let outerClass = 'outerDiv';
+  let innerClass = 'innerDiv';
+  const cHorizontal = node.constraints && node.constraints.horizontal;
+  const cVertical = node.constraints && node.constraints.vertical;
+  let outerStyle = {} as any;
+
+  if (node.order) {
+    outerStyle.zIndex = node.order;
+  }
+  const layoutStyle = new LayoutStyle(styles);
+  const backgroundStyle = new BackgroundStyle(styles);
+  const effectStyle = new EffectStyle(styles);
+  const strokeStyle = new StrokeStyle(styles);
+  const fontStyle = new FontStyle(styles);
+  const paragraphSetMarkup = new ParagraphMarkup(markup);
+
+  const layoutParamStyle: LayoutParamStyle = {
+    value: bounds,
+    outerStyle,
+    outerClass,
+    isVertical: false,
+  };
+  const paragraphParamMarkup = {
+    content: null,
+    fontSetStyle: fontStyle,
+    value: node,
+    para: '',
+    styleCache: {},
+    currStyle: 0,
+    ps: [],
+  } as ParagraphParamMarkup;
+  layoutParamStyle.isVertical = true;
+  bounds = layoutParamStyle.value;
+  outerStyle = layoutParamStyle.outerStyle;
+  outerClass = layoutParamStyle.outerClass;
+  layoutStyle.invoke(cHorizontal, layoutParamStyle);
+  layoutStyle.invoke(cVertical, layoutParamStyle);
+  bounds = layoutParamStyle.value;
+  outerStyle = layoutParamStyle.outerStyle;
+  outerClass = layoutParamStyle.outerClass;
+
+  if (
+    node.type === Nodes.FRAME ||
+    node.type === Nodes.INSTANCE ||
+    node.type === Nodes.COMPONENT
+  ) {
+    backgroundStyle.invoke(node.type, { value: node });
+  } else if (node.type === Nodes.RECTANGLE) {
+    const lastFill = backgroundStyle.style.lastPaint(
+      (node as RectangleFigma).fills
+    );
+    backgroundStyle.invoke(lastFill.type, { value: node });
+    for (let effect of node.effects) {
+      effectStyle.invoke(effect.type, { value: effect });
+    }
+    strokeStyle.invoke(node.type, { value: node });
+  } else if (node.type === 'TEXT') {
+    backgroundStyle.invoke(node.type, { value: node });
+    fontStyle.invoke(node.type, { value: node.style });
+    paragraphSetMarkup.invoke(node.type, paragraphParamMarkup);
+    content = paragraphParamMarkup.content;
+  }
+  divSetMarkup.invoke(
+    node,
+    parent,
+    content,
+    styles,
+    outerStyle,
+    outerClass,
+    innerClass,
+    minChildren,
+    centerChildren,
+    maxChildren,
+    indent,
+    div
+  );
+}
+
+export const createComponent = (
+  component,
+  imgMap,
+  componentMap,
+  div?: DivParamMarkup
+) => {
   const name = 'C' + component.name.replace(/\W+/g, '');
   const instance = name + component.id.replace(';', 'S').replace(':', 'D');
 
@@ -174,6 +293,7 @@ export const createComponent = (component, imgMap, componentMap) => {
   if (!fs.existsSync(path)) {
     const componentSrc = `
     import { Component, Input } from '@angular/core';
+    import { style } from '@angular/animations';
 
     @Component({
       selector: 'app-${name}',
@@ -193,208 +313,24 @@ export const createComponent = (component, imgMap, componentMap) => {
     doc += `${indent}${msg}\n`;
   }
 
-  const visitNode = (node, parent, lastVertical, indent) => {
-    // const style = new Style();
-    const markup = new Markup();
+  div.component = component;
+  div.imgMap = imgMap;
+  div.componentMap = componentMap;
+  div.codeGen.visitNode = visitNode;
+  div.codeGen.print = print;
 
-    let content = null;
-    let img = null;
-    const styles = new Style(); // TODO: styles rename to style
-    let minChildren = [];
-    const maxChildren = [];
-    const centerChildren = [];
-    let bounds = null;
-    let nodeBounds = null;
-
-    if (parent != null) {
-      nodeBounds = node.absoluteBoundingBox;
-      const nx2 = nodeBounds.x + nodeBounds.width;
-      const ny2 = nodeBounds.y + nodeBounds.height;
-      const parentBounds = parent.absoluteBoundingBox;
-      const px = parentBounds.x;
-      const py = parentBounds.y;
-
-      bounds = {
-        left: nodeBounds.x - px,
-        right: px + parentBounds.width - nx2,
-        top:
-          lastVertical == null
-            ? nodeBounds.y - py
-            : nodeBounds.y - lastVertical,
-        bottom: py + parentBounds.height - ny2,
-        width: nodeBounds.width,
-        height: nodeBounds.height,
-      };
-    }
-
-    expandChildren(node, parent, minChildren, maxChildren, centerChildren, 0);
-
-    let outerClass = 'outerDiv';
-    let innerClass = 'innerDiv';
-    const cHorizontal = node.constraints && node.constraints.horizontal;
-    const cVertical = node.constraints && node.constraints.vertical;
-    let outerStyle = {} as any;
-
-    if (node.order) {
-      outerStyle.zIndex = node.order;
-    }
-
-    let layoutParamStyle: LayoutParamStyle = {
-      value: bounds,
-      outerStyle,
-      outerClass,
-      isVertical: false,
-    };
-
-    new LayoutStyle(styles).invoke(cHorizontal, layoutParamStyle);
-    layoutParamStyle.isVertical = true;
-    bounds = layoutParamStyle.value;
-    outerStyle = layoutParamStyle.outerStyle;
-    outerClass = layoutParamStyle.outerClass;
-    new LayoutStyle(styles).invoke(cVertical, layoutParamStyle);
-    bounds = layoutParamStyle.value;
-    outerStyle = layoutParamStyle.outerStyle;
-    outerClass = layoutParamStyle.outerClass;
-    const backgroundStyle = new BackgroundStyle(styles);
-    const effectStyle = new EffectStyle(styles);
-    const strokeStyle = new StrokeStyle(styles);
-    const fontStyle = new FontStyle(styles);
-    const paragraphSetMarkup = new ParagraphMarkup(markup);
-    const paragraphParamMarkup = {
-      content: null,
-      fontSetStyle: fontStyle,
-      value: node,
-      para: '',
-      styleCache: {},
-      currStyle: 0,
-      ps: [],
-    } as ParagraphParamMarkup;
-
-    if (
-      node.type === Nodes.FRAME ||
-      node.type === Nodes.INSTANCE ||
-      node.type === Nodes.COMPONENT
-    ) {
-      backgroundStyle.invoke(node.type, { value: node });
-    } else if (node.type === Nodes.RECTANGLE) {
-      const lastFill = backgroundStyle.style.lastPaint(
-        (node as RectangleFigma).fills
-      );
-      backgroundStyle.invoke(lastFill.type, { value: node });
-      for (let effect of node.effects) {
-        effectStyle.invoke(effect.type, { value: effect });
-      }
-      strokeStyle.invoke(node.type, { value: node });
-    } else if (node.type === 'TEXT') {
-      backgroundStyle.invoke(node.type, { value: node });
-      fontStyle.invoke(node.type, { value: node.style });
-      paragraphSetMarkup.invoke(node.type, paragraphParamMarkup);
-      content = paragraphParamMarkup.content;
-    }
-
-    function printDiv(styles, outerStyle, indent, nodeName = 'div') {
-      print(
-        `<div [ngStyle]="${JSON.stringify(outerStyle).replace(
-          /"/g,
-          "'"
-        )}" class="${outerClass.replace(/"/g, "'")}">`,
-        indent
-      );
-      if (nodeName !== 'div') {
-        print(`  <${nodeName} [props]="props"`, indent);
-      } else {
-        print(`  <div`, indent);
-      }
-      print(`    id="${node.id}"`, indent);
-      print(
-        `    [ngStyle]="${JSON.stringify(styles).replace(/"/g, "'")}"`,
-        indent
-      );
-      print(`    class="${innerClass}"`, indent);
-      print(`  >`, indent);
-      if (nodeName !== 'div') {
-        print(`</${nodeName}>`, '');
-        print(`</div>`, '');
-      }
-    }
-    if (parent != null) {
-      printDiv(styles, outerStyle, indent);
-    }
-
-    if (node.id !== component.id && node.name.charAt(0) === '#') {
-      const nodeName = node.name.replace(/\W+/g, '');
-      // TODO: parse props
-      printDiv(styles, outerStyle, indent, `app-C${nodeName}`);
-      createComponent(node, imgMap, componentMap);
-    } else if (node.type === 'VECTOR') {
-      // print html
-
-      print(`<div class="vector">${imgMap[node.id]}</div>`, indent);
-    } else {
-      const newNodeBounds = node.absoluteBoundingBox;
-      const newLastVertical =
-        newNodeBounds && newNodeBounds.y + newNodeBounds.height;
-      print(`    <div>`, indent);
-      let first = true;
-      for (const child of minChildren) {
-        visitNode(
-          child,
-          node,
-          first ? null : newLastVertical,
-          indent + '      '
-        );
-        first = false;
-      }
-      for (const child of centerChildren)
-        visitNode(child, node, null, indent + '      ');
-      if (maxChildren.length > 0) {
-        outerClass += ' maxer';
-        styles.width = '100%';
-        styles.pointerEvents = 'none';
-        styles.backgroundColor = null;
-        printDiv(styles, outerStyle, indent + '      ');
-        first = true;
-        for (const child of maxChildren) {
-          visitNode(
-            child,
-            node,
-            first ? null : newLastVertical,
-            indent + '          '
-          );
-          first = false;
-        }
-        print(`        </div>`, indent);
-        print(`      </div>`, indent);
-      }
-      if (content != null) {
-        if (node.name.charAt(0) === '$') {
-          const varName = node.name.substring(1);
-          for (const piece of content) {
-            print(piece, indent + '        ');
-          }
-        } else {
-          for (const piece of content) {
-            print(piece, indent + '      ');
-          }
-        }
-      }
-      print(`    </div>`, indent);
-    }
-
-    if (parent != null) {
-      print(`  </div>`, indent);
-      print(`</div>`, indent);
-    }
-  };
-
-  visitNode(component, null, null, '  ');
+  visitNode(component, null, null, '  ', div);
 
   const htmPath = `src/components/${name}.component.html`;
   fs.writeFile(htmPath, doc, function (err) {
     if (err) console.log(err);
     console.log(`wrote ${htmPath}`);
   });
-  componentMap[component.id] = { instance, name, doc };
+  componentMap[component.id] = {
+    instance,
+    name,
+    doc,
+  };
 };
 
 // module.exports = { createComponent, colorString }

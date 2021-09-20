@@ -33,8 +33,8 @@
                                                 "type": "RECTANGLE",
                                                 "blendMode": "PASS_THROUGH",
                                                 "absoluteBoundingBox": {
-                                                    "x": -1672.2939453125,
-                                                    "y": -434.0928955078125,
+                                                    "x": -1672.1053466796875,
+                                                    "y": -434.0929260253906,
                                                     "width": 628.5506591796875,
                                                     "height": 213.31814575195312
                                                 },
@@ -58,13 +58,7 @@
                                                 "strokeWeight": 0.6708117723464966,
                                                 "strokeAlign": "INSIDE",
                                                 "effects": [],
-                                                "cornerRadius": 26.832469940185547,
-                                                "rectangleCornerRadii": [
-                                                    26.832469940185547,
-                                                    26.832469940185547,
-                                                    26.832469940185547,
-                                                    26.832469940185547
-                                                ]
+                                                "cornerRadius": 26.832469940185547
                                             },
                                             {
                                                 "id": "I13:13;12:56",
@@ -79,7 +73,7 @@
                                                         "blendMode": "PASS_THROUGH",
                                                         "absoluteBoundingBox": {
                                                             "x": -1533.9180908203125,
-                                                            "y": -383.7820129394531,
+                                                            "y": -383.78204345703125,
                                                             "width": 297.8404235839844,
                                                             "height": 111.35475158691406
                                                         },
@@ -127,7 +121,7 @@
                                                         "blendMode": "PASS_THROUGH",
                                                         "absoluteBoundingBox": {
                                                             "x": -1260.897705078125,
-                                                            "y": -369.6949462890625,
+                                                            "y": -369.6949768066406,
                                                             "width": 79.689208984375,
                                                             "height": 66.75145721435547
                                                         },
@@ -175,7 +169,7 @@
                                                         "blendMode": "PASS_THROUGH",
                                                         "absoluteBoundingBox": {
                                                             "x": -1250.164794921875,
-                                                            "y": -321.3965148925781,
+                                                            "y": -321.39654541015625,
                                                             "width": 64.45450592041016,
                                                             "height": 50.356361389160156
                                                         },
@@ -219,7 +213,7 @@
                                                 ],
                                                 "absoluteBoundingBox": {
                                                     "x": -1533.9180908203125,
-                                                    "y": -383.7820129394531,
+                                                    "y": -383.78204345703125,
                                                     "width": 352.7095947265625,
                                                     "height": 112.74185180664062
                                                 },
@@ -255,8 +249,8 @@
                                                     }
                                                 ],
                                                 "strokes": [],
-                                                "strokeWeight": 0.6708117723464966,
-                                                "strokeAlign": "INSIDE",
+                                                "strokeWeight": 0,
+                                                "strokeAlign": "CENTER",
                                                 "backgroundColor": {
                                                     "r": 0,
                                                     "g": 0,
@@ -267,8 +261,8 @@
                                             }
                                         ],
                                         "absoluteBoundingBox": {
-                                            "x": -1672.2939453125,
-                                            "y": -434.0928955078125,
+                                            "x": -1672.1053466796875,
+                                            "y": -434.0929260253906,
                                             "width": 628.5506591796875,
                                             "height": 213.31814575195312
                                         },
@@ -304,8 +298,8 @@
                                             }
                                         ],
                                         "strokes": [],
-                                        "strokeWeight": 0.6708117723464966,
-                                        "strokeAlign": "INSIDE",
+                                        "strokeWeight": 0,
+                                        "strokeAlign": "CENTER",
                                         "backgroundColor": {
                                             "r": 0,
                                             "g": 0,
@@ -351,7 +345,13 @@
                                                 "strokeWeight": 0.4803072512149811,
                                                 "strokeAlign": "INSIDE",
                                                 "effects": [],
-                                                "cornerRadius": 38.42457962036133
+                                                "cornerRadius": 38.42457962036133,
+                                                "rectangleCornerRadii": [
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0
+                                                ]
                                             },
                                             {
                                                 "id": "I13:13;12:60;42:6194",
@@ -384,7 +384,13 @@
                                                 "strokeWeight": 0.4803072512149811,
                                                 "strokeAlign": "INSIDE",
                                                 "effects": [],
-                                                "cornerRadius": 48.03071594238281
+                                                "cornerRadius": 48.03071594238281,
+                                                "rectangleCornerRadii": [
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0
+                                                ]
                                             },
                                             {
                                                 "id": "I13:13;12:60;42:6195",
@@ -417,7 +423,13 @@
                                                 "strokeWeight": 0.4803072512149811,
                                                 "strokeAlign": "INSIDE",
                                                 "effects": [],
-                                                "cornerRadius": 48.03071594238281
+                                                "cornerRadius": 48.03071594238281,
+                                                "rectangleCornerRadii": [
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0
+                                                ]
                                             },
                                             {
                                                 "id": "I13:13;12:60;42:6196",
@@ -450,7 +462,13 @@
                                                 "strokeWeight": 0.4783306419849396,
                                                 "strokeAlign": "INSIDE",
                                                 "effects": [],
-                                                "cornerRadius": 47.83305740356445
+                                                "cornerRadius": 47.83305740356445,
+                                                "rectangleCornerRadii": [
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0
+                                                ]
                                             },
                                             {
                                                 "id": "I13:13;12:60;42:6197",
@@ -483,7 +501,13 @@
                                                 "strokeWeight": 0.4803072512149811,
                                                 "strokeAlign": "INSIDE",
                                                 "effects": [],
-                                                "cornerRadius": 48.03071594238281
+                                                "cornerRadius": 48.03071594238281,
+                                                "rectangleCornerRadii": [
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0
+                                                ]
                                             }
                                         ],
                                         "absoluteBoundingBox": {
@@ -525,7 +549,7 @@
                                             }
                                         ],
                                         "strokes": [],
-                                        "strokeWeight": 0.6708117723464966,
+                                        "strokeWeight": 1,
                                         "strokeAlign": "INSIDE",
                                         "backgroundColor": {
                                             "r": 0,
@@ -605,8 +629,8 @@
                                     }
                                 ],
                                 "strokes": [],
-                                "strokeWeight": 0.6708117723464966,
-                                "strokeAlign": "INSIDE",
+                                "strokeWeight": 0,
+                                "strokeAlign": "CENTER",
                                 "backgroundColor": {
                                     "r": 1,
                                     "g": 1,
@@ -654,8 +678,8 @@
                             }
                         ],
                         "strokes": [],
-                        "strokeWeight": 1,
-                        "strokeAlign": "INSIDE",
+                        "strokeWeight": 0,
+                        "strokeAlign": "CENTER",
                         "backgroundColor": {
                             "r": 1,
                             "g": 1,
@@ -741,8 +765,8 @@
                             }
                         ],
                         "strokes": [],
-                        "strokeWeight": 1,
-                        "strokeAlign": "INSIDE",
+                        "strokeWeight": 0,
+                        "strokeAlign": "CENTER",
                         "backgroundColor": {
                             "r": 1,
                             "g": 1,
@@ -760,6 +784,7 @@
                     "a": 1
                 },
                 "prototypeStartNodeID": null,
+                "flowStartingPoints": [],
                 "prototypeDevice": {
                     "type": "NONE",
                     "rotation": "NONE"
@@ -814,13 +839,7 @@
                                         "strokeAlign": "INSIDE",
                                         "exportSettings": [],
                                         "effects": [],
-                                        "cornerRadius": 40,
-                                        "rectangleCornerRadii": [
-                                            40,
-                                            40,
-                                            40,
-                                            40
-                                        ]
+                                        "cornerRadius": 40
                                     },
                                     {
                                         "id": "12:56",
@@ -1011,8 +1030,8 @@
                                             }
                                         ],
                                         "strokes": [],
-                                        "strokeWeight": 1,
-                                        "strokeAlign": "INSIDE",
+                                        "strokeWeight": 0,
+                                        "strokeAlign": "CENTER",
                                         "backgroundColor": {
                                             "r": 0,
                                             "g": 0,
@@ -1060,8 +1079,8 @@
                                     }
                                 ],
                                 "strokes": [],
-                                "strokeWeight": 1,
-                                "strokeAlign": "INSIDE",
+                                "strokeWeight": 0,
+                                "strokeAlign": "CENTER",
                                 "backgroundColor": {
                                     "r": 0,
                                     "g": 0,
@@ -1108,7 +1127,13 @@
                                         "strokeWeight": 0.7160089612007141,
                                         "strokeAlign": "INSIDE",
                                         "effects": [],
-                                        "cornerRadius": 57.28071594238281
+                                        "cornerRadius": 57.28071594238281,
+                                        "rectangleCornerRadii": [
+                                            0,
+                                            0,
+                                            0,
+                                            0
+                                        ]
                                     },
                                     {
                                         "id": "I12:60;42:6194",
@@ -1141,7 +1166,13 @@
                                         "strokeWeight": 0.7160089612007141,
                                         "strokeAlign": "INSIDE",
                                         "effects": [],
-                                        "cornerRadius": 71.60088348388672
+                                        "cornerRadius": 71.60088348388672,
+                                        "rectangleCornerRadii": [
+                                            0,
+                                            0,
+                                            0,
+                                            0
+                                        ]
                                     },
                                     {
                                         "id": "I12:60;42:6195",
@@ -1174,7 +1205,13 @@
                                         "strokeWeight": 0.7160089612007141,
                                         "strokeAlign": "INSIDE",
                                         "effects": [],
-                                        "cornerRadius": 71.60088348388672
+                                        "cornerRadius": 71.60088348388672,
+                                        "rectangleCornerRadii": [
+                                            0,
+                                            0,
+                                            0,
+                                            0
+                                        ]
                                     },
                                     {
                                         "id": "I12:60;42:6196",
@@ -1207,7 +1244,13 @@
                                         "strokeWeight": 0.7130624055862427,
                                         "strokeAlign": "INSIDE",
                                         "effects": [],
-                                        "cornerRadius": 71.30622863769531
+                                        "cornerRadius": 71.30622863769531,
+                                        "rectangleCornerRadii": [
+                                            0,
+                                            0,
+                                            0,
+                                            0
+                                        ]
                                     },
                                     {
                                         "id": "I12:60;42:6197",
@@ -1240,7 +1283,13 @@
                                         "strokeWeight": 0.7160089612007141,
                                         "strokeAlign": "INSIDE",
                                         "effects": [],
-                                        "cornerRadius": 71.60088348388672
+                                        "cornerRadius": 71.60088348388672,
+                                        "rectangleCornerRadii": [
+                                            0,
+                                            0,
+                                            0,
+                                            0
+                                        ]
                                     }
                                 ],
                                 "absoluteBoundingBox": {
@@ -1363,8 +1412,8 @@
                             }
                         ],
                         "strokes": [],
-                        "strokeWeight": 1,
-                        "strokeAlign": "INSIDE",
+                        "strokeWeight": 0,
+                        "strokeAlign": "CENTER",
                         "backgroundColor": {
                             "r": 1,
                             "g": 1,
@@ -1382,6 +1431,7 @@
                     "a": 1
                 },
                 "prototypeStartNodeID": null,
+                "flowStartingPoints": [],
                 "prototypeDevice": {
                     "type": "NONE",
                     "rotation": "NONE"
@@ -1394,19 +1444,23 @@
         "6957:2": {
             "key": "3adfd722e98842cb34ea2aeb99d125799ebdfd21",
             "name": "Figma \"F\" 10×15",
-            "description": ""
+            "description": "",
+            "documentationLinks": []
         },
         "12:53": {
             "key": "dbe971cca11feeb98c3c74357bdc4d20678f2f88",
             "name": "fclock",
-            "description": ""
+            "description": "",
+            "documentationLinks": []
         }
     },
+    "componentSets": {},
     "schemaVersion": 0,
     "styles": {},
     "name": "Untitled",
-    "lastModified": "2020-11-19T08:44:11Z",
-    "thumbnailUrl": "https://s3-alpha-sig.figma.com/thumbnails/6af9981c-d43e-46bf-b709-f2cce188dea9?Expires=1614556800&Signature=gDlTXK1lau9R~BR4Fn97me1T5vk5hjvkW-wxE1WX0uA1Lw6Zvyg1vXCuqutYxgwQQpcKXGBu9cmD5MZF2Ui5Lf6MAN9yRf4JKensdcE0sEOm~ofvgD0o7pyACBO9VZDG4WK9sRS8uF1DadN0PBZYNa4khN6OR-TxZwutgZLcijj~ndj6sot66AxcbvJsF1c-3Q7a3udRvhO4hiQAwg-1KEcJIYhcjMcV6GQwBf4UcqyoxhAVX8EqhFk9crQiN2gwDOmg0Z69yvewpz1cstqsV36bkpXKHbj~mnsRCkCwrSxxi8ohuIMgjLuWptQqe732LuqVhQvIhLxiBJNts~c2uw__&Key-Pair-Id=APKAINTVSUGEWH5XD5UA",
-    "version": "550658508",
-    "role": "viewer"
+    "lastModified": "2020-11-19T08:44:12Z",
+    "thumbnailUrl": "https://s3-alpha-sig.figma.com/thumbnails/5144f986-45fc-4f7a-8101-388952c164a0?Expires=1632700800&Signature=VQlhcx6~aUk6lcKL-C2d24njvCibFW581rsXcwV3Q8YeDSARaJ9TaPByAaXBwBsa0-0OUBIWqKjkbuTrWZbMWSbclaHP8KMKxwtfU5nAQgBKXv41RwxcAcPF~VkwnHQGK99ifxetNHPMfz5XhInh72pmlf4Bl0DevJh-D0jZgQ~u~A3N5pIomJcOy5X2IkF8NStEQLcbiQzYVuCOvjLpUjsk00x-3OAAixtZMJs-hSQwbLRexwfkKMmJPfiffA6J76G4P0afynfBm-Q6wyWxFJtazAGbw-tL44QEm0VKfIkDcQvpwc7owMuWnaliN4UvZYNmkShvZQpqIed7c1yzmA__&Key-Pair-Id=APKAINTVSUGEWH5XD5UA",
+    "version": "1006382561",
+    "role": "viewer",
+    "editorType": "figma"
 }

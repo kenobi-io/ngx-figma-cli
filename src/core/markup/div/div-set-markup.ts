@@ -1,10 +1,23 @@
-import { SetMarkup } from "../set-markup";
-import { Markup } from "../markup";
-import { Nodes, Characters } from "../../api";
-import { DivParamMarkup } from "./div-param-markup";
+import { SetMarkup } from '../set-markup';
+import { Markup } from '../markup';
+import { Nodes, Characters } from '../../api';
+import { DivParamMarkup } from './div-param-markup';
 
-export interface DivSetMarkup
-  extends SetMarkup<Partial<Markup>, Nodes | Characters> {
+export interface DivSetMarkup {
+  // extends SetMarkup<Partial<Markup>, Nodes | Characters> {
   markup: Partial<Markup>;
-  invoke(nodeTypes: Nodes | Characters, divParamMarkup: DivParamMarkup): void;
+  invoke(
+    node,
+    parent,
+    content,
+    styles,
+    outerStyle,
+    outerClass,
+    innerClass,
+    minChildren,
+    centerChildren,
+    maxChildren,
+    indent,
+    divPMp: DivParamMarkup
+  ): void;
 }

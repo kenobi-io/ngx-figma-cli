@@ -1,20 +1,23 @@
 import { ParamMarkup } from '../param-markup';
-import { CodeGeneration } from '../../../start/code-generation/code-generation';
+// import { CodeGeneration } from '../../../start/code-generation/code-generation';
+import { Style } from '../../style/style';
 
 export interface DivParamMarkup extends ParamMarkup {
   component: any;
   parent: any;
-  style: any;
   outerStyle: any;
   innerClass: any;
   outerClass: any;
   nodeName: string | 'div';
   indent: any;
-  maxChildren: [];
-  minChildren: [];
-  centerChildren: [];
+  maxChildren: any[];
+  minChildren: any[];
+  centerChildren: any[];
   content: string[];
-  codeGen: CodeGeneration;
+  codeGen: // | CodeGeneration
+  // |
+  { createComponent: Function; visitNode: Function; print: Function };
   imgMap: [];
   componentMap: [];
+  style: Style;
 }

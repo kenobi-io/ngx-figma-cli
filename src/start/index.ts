@@ -12,7 +12,7 @@ import {
 } from '@angular-devkit/schematics';
 import { take } from 'rxjs/operators';
 import { config } from 'dotenv';
-import { CodeGeneration } from './code-generation/code-generation';
+// import { CodeGeneration } from './code-generation/code-generation';
 import { FilesRequest, RestApiService } from '../core';
 import { Schema } from './schema';
 
@@ -23,18 +23,22 @@ export default function (options?: Schema): Rule {
     (_tree: Tree, context: SchematicContext) => {
       config();
       options.index++;
-      // context.logger.info('My Start Schematic: ' + JSON.stringify(options));
-      new RestApiService()
-        .get(FilesRequest, context)
-        .pipe(take(1))
-        .subscribe((result: any) => {
-          // const cg = new CodeGeneration();
-          // cg.generate(result, cg);
-          main(result).catch((err) => {
-            console.error(err);
-            console.error(err.stack);
-          });
-        });
+      context.logger.log('info', `${options.index}`);
+      // // context.logger.info('My Start Schematic: ' + JSON.stringify(options));
+      // new RestApiService()
+      //   .get(FilesRequest, context)
+      //   .pipe(take(1))
+      //   .subscribe((result: any) => {
+      //     // const cg = new CodeGeneration();
+      //     // cg.generate(result, cg);
+      const path = `./src/result.json`;
+      const file = _tree.read(path);
+      const result = JSON.parse(file!.toString());
+      main(result).catch((err) => {
+        console.error(err);
+        console.error(err.stack);
+      });
+      // });
     },
     // mergeWith(apply(url('./files/components'), [
     //   applyTemplates({

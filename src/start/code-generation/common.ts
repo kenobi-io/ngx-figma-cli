@@ -36,14 +36,14 @@ const fs = require('fs');
 let devToken =
   process.env.DEV_TOKEN || '203090-63cd909a-5ce6-4370-8b53-e19f27becaa8';
 
-if (process.argv.length < 3) {
-  console.log('Usage: node setup.js <file-key> [figma-dev-token]');
-  process.exit(0);
-}
+// if (process.argv.length < 3) {
+//   console.log('Usage: node setup.js <file-key> [figma-dev-token]');
+//   process.exit(0);
+// }
 
-if (process.argv.length > 3) {
-  devToken = process.argv[3];
-}
+// if (process.argv.length > 3) {
+//   devToken = process.argv[3];
+// }
 
 const vectorMap = {};
 const vectorList = [];
@@ -74,6 +74,7 @@ function preprocessTree(node) {
     (node.blendMode != null &&
       ['PASS_THROUGH', 'NORMAL'].indexOf(node.blendMode) < 0)
   ) {
+    console.log('Set vector from[blendMode]: ', node.type);
     node.type = 'VECTOR';
   }
 
@@ -101,6 +102,7 @@ function preprocessTree(node) {
   node.children = children;
 
   if (children && children.length > 0 && vectorsOnly) {
+    console.log('Set vector from[children]: ', node.type);
     node.type = 'VECTOR';
     node.constraints = {
       vertical: vectorVConstraint,
@@ -109,6 +111,7 @@ function preprocessTree(node) {
   }
 
   if (vectorTypes.indexOf(node.type) >= 0) {
+    console.log('Set vector from[vectorTypes]: ', node.type);
     node.type = 'VECTOR';
     vectorMap[node.id] = node;
     vectorList.push(node.id);
@@ -145,6 +148,14 @@ export async function main(result) {
 
   let guids = vectorList.join(',');
   let api = new RestApiService();
+
+  const div = {} as DivParamMarkup;
+  div.codeGen = {} as {
+    createComponent: Function;
+    visitNode: Function;
+    print: Function;
+  };
+  div.codeGen.createComponent = createComponent;
 
   api
     .get(ImagesRequest, guids)
@@ -190,7 +201,7 @@ export async function main(result) {
         const child = canvas.children[i];
         if (child.name.charAt(0) === '#' && child.visible !== false) {
           const child = canvas.children[i];
-          createComponent(child, images, componentMap);
+          createComponent(child, images, componentMap, div);
         }
       }
 

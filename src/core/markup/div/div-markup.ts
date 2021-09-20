@@ -16,171 +16,205 @@ export class DivMarkup implements DivSetMarkup {
     this.divMap = divMap ? divMap : this.div();
   }
 
-  public invoke(divMarkupes: Nodes | Characters, divPMp: DivParamMarkup): void {
-    if (divPMp.parent != null) {
-      this.divMap.get(Characters.PARENT_START).call(this, divPMp);
+  public invoke(
+    node,
+    parent,
+    content,
+    styles,
+    outerStyle,
+    outerClass,
+    innerClass,
+    minChildren,
+    centerChildren,
+    maxChildren,
+    indent,
+    divPMp: DivParamMarkup
+  ): void {
+    const markuparam = {
+      node,
+      parent,
+      content,
+      style: styles,
+      outerStyle,
+      outerClass,
+      innerClass,
+      minChildren,
+      centerChildren,
+      maxChildren,
+      nodeName: 'div',
+      indent,
+    };
+    console.log('interation nodes type: ', node.type);
+    if (parent != null) {
+      console.log('PARENT_START');
+      this.divMap.get(Characters.PARENT_START).call(this, divPMp, markuparam);
     }
-    if (
-      divPMp.value.id !== divPMp.component.id &&
-      divPMp.value.name.charAt(0) === '#'
-    ) {
-      this.divMap.get(Characters.HASH).call(this, divPMp);
-    } else if (divMarkupes === Nodes.VECTOR) {
-      console.log('divMarkupes: VECTOR');
-      this.divMap.get(divMarkupes).call(this, divPMp);
+    if (node.id !== divPMp.component.id && node.name.charAt(0) === '#') {
+      console.log('Characters.HASH');
+      this.divMap.get(Characters.HASH).call(this, divPMp, markuparam);
+    } else if (node.type === 'VECTOR') {
+      console.log('VECTOR');
+      this.divMap.get(Nodes.VECTOR).call(this, divPMp, markuparam);
     } else {
-      this.divMap.get(Characters.DEFAULT).call(this, divPMp);
+      console.log('Characters.DEFAULT');
+      this.divMap.get(Characters.DEFAULT).call(this, divPMp, markuparam);
     }
 
-    if (divPMp.parent != null) {
-      this.divMap.get(Characters.PARENT_END).call(this, divPMp);
+    if (parent != null) {
+      console.log('Characters.PARENT_END');
+      this.divMap.get(Characters.PARENT_END).call(this, divPMp, markuparam);
     }
+    return;
   }
 
   private div(): Map<Nodes | Characters, InnerArrow> {
     const divMap = new Map();
-    divMap.set(Characters.PARENT_START, (param: DivParamMarkup) =>
-      this.parentStart(param)
+    divMap.set(Characters.PARENT_START, (dpm: DivParamMarkup, markuparam) =>
+      this.parentStart(dpm, markuparam)
     );
-    divMap.set(Characters.HASH, (param: DivParamMarkup) =>
-      this.chartAtHash(param)
+    divMap.set(Characters.HASH, (dpm: DivParamMarkup, markuparam) =>
+      this.chartAtHash(dpm, markuparam)
     );
-    divMap.set(Nodes.VECTOR, (param: DivParamMarkup) => this.vector(param));
-    divMap.set(Characters.DEFAULT, (param: DivParamMarkup) =>
-      this.default(param)
+    divMap.set(Nodes.VECTOR, (dpm: DivParamMarkup, markuparam) =>
+      this.vector(dpm, markuparam)
     );
-    divMap.set(Characters.PARENT_END, (param: DivParamMarkup) =>
-      this.parentEnd(param)
+    divMap.set(Characters.DEFAULT, (dpm: DivParamMarkup, markuparam) =>
+      this.default(dpm, markuparam)
+    );
+    divMap.set(Characters.PARENT_END, (dpm: DivParamMarkup, markuparam) =>
+      this.parentEnd(dpm, markuparam)
     );
     return divMap;
   }
 
-  private parentStart(divPMp: DivParamMarkup) {
-    this.printDiv(divPMp);
+  private parentStart(divPMp: DivParamMarkup, markuparam) {
+    this.printDiv(divPMp, markuparam);
   }
 
-  private parentEnd(divPMp: DivParamMarkup) {
-    this.markup.print(`  </div>`, divPMp.indent);
-    this.markup.print(`</div>`, divPMp.indent);
+  private parentEnd(divPMp: DivParamMarkup, markuparam) {
+    divPMp.codeGen.print(`  </div>`, markuparam.indent);
+    divPMp.codeGen.print(`</div>`, markuparam.indent);
   }
 
-  private chartAtHash(divPMp: DivParamMarkup) {
-    const nodeName = divPMp.value.name.replace(/\W+/g, '');
+  private chartAtHash(divPMp: DivParamMarkup, markuparam) {
+    const nodeName = markuparam.node.name.replace(/\W+/g, '');
     // TODO: parse props
-    divPMp.nodeName = `app-C${nodeName}`;
-    this.printDiv(divPMp);
+    markuparam.nodeName = `app-C${nodeName}`;
+    this.printDiv(divPMp, markuparam);
     divPMp.codeGen.createComponent(
-      divPMp.value,
+      markuparam.node,
       divPMp.imgMap,
       divPMp.componentMap,
       divPMp
     );
   }
 
-  private printDiv(divPMp: DivParamMarkup): void {
-    console.log('printDiv: ', divPMp.outerStyle);
-    this.markup.print(
-      `<div [ngStyle]="${JSON.stringify(divPMp.outerStyle).replace(/"/g, "'")}" 
-                                    class="${divPMp.outerClass.replace(
-                                      /"/g,
-                                      "'"
-                                    )}">`,
-      divPMp.indent
+  private printDiv(divPMp, markuparam) {
+    // printDiv(divPMp: DivParamMarkup): void {
+    divPMp.codeGen.print(
+      `<div [ngStyle]="${JSON.stringify(markuparam.outerStyle).replace(
+        /"/g,
+        "'"
+      )}" class="${markuparam.outerClass.replace(/"/g, "'")}">`,
+      markuparam.indent
     );
-    if (divPMp.nodeName !== 'div') {
-      this.markup.print(`  <${divPMp.nodeName} [props]="props"`, divPMp.indent);
+    if (markuparam.nodeName !== 'div') {
+      divPMp.codeGen.print(
+        `  <${markuparam.nodeName} [props]="props"`,
+        markuparam.indent
+      );
     } else {
-      this.markup.print(`  <div`, divPMp.indent);
+      divPMp.codeGen.print(`  <div`, markuparam.indent);
     }
-    this.markup.print(`    id="${divPMp.value.id}"`, divPMp.indent);
-    this.markup.print(
-      `    [ngStyle]="${JSON.stringify(divPMp.style).replace(/"/g, "'")}"`,
-      divPMp.indent
+    divPMp.codeGen.print(`    id="${markuparam.node.id}"`, markuparam.indent);
+    divPMp.codeGen.print(
+      `    [ngStyle]="${JSON.stringify(markuparam.style).replace(/"/g, "'")}"`,
+      markuparam.indent
     );
-    this.markup.print(`    class="${divPMp.innerClass}"`, divPMp.indent);
-    this.markup.print(`  >`, divPMp.indent);
-    if (divPMp.nodeName !== 'div') {
-      this.markup.print(`</${divPMp.nodeName}>`, '');
-      this.markup.print(`</div>`, '');
+    divPMp.codeGen.print(
+      `    class="${markuparam.innerClass}"`,
+      markuparam.indent
+    );
+    divPMp.codeGen.print(`  >`, markuparam.indent);
+    if (markuparam.nodeName !== 'div') {
+      divPMp.codeGen.print(`</${markuparam.nodeName}>`, '');
+      divPMp.codeGen.print(`</div>`, '');
     }
   }
 
-  private vector(divPMp: DivParamMarkup) {
-    this.markup.print(
-      `<div class="vector">${divPMp.imgMap[divPMp.value.id]}</div>`,
-      divPMp.indent
+  private vector(divPMp: DivParamMarkup, markuparam) {
+    divPMp.codeGen.print(
+      `<div class="vector">${divPMp.imgMap[markuparam.node.id]}</div>`,
+      markuparam.indent
     );
   }
 
-  private default(divPMp: DivParamMarkup) {
-    const newNodeBounds = divPMp.value.absoluteBoundingBox;
+  private default(divPMp: DivParamMarkup, markuparam) {
+    const newNodeBounds = markuparam.node.absoluteBoundingBox;
     const newLastVertical =
       newNodeBounds && newNodeBounds.y + newNodeBounds.height;
-    this.markup.print(`    <div>`, divPMp.indent);
+    divPMp.codeGen.print(`    <div>`, markuparam.indent);
     let first = true;
 
-    for (const child of divPMp.minChildren) {
-      // console.log('visitNode minChildren: ', divPMp.minChildren.length);
+    for (const child of markuparam.minChildren) {
       divPMp.codeGen.visitNode(
         child,
-        divPMp.value,
+        markuparam.node,
         first ? null : newLastVertical,
-        divPMp.indent + '      ',
+        markuparam.indent + '      ',
         divPMp
       );
       first = false;
     }
 
-    for (const child of divPMp.centerChildren) {
-      // console.log('visitNode centerChildren: ', divPMp.centerChildren.length);
+    for (const child of markuparam.centerChildren) {
       divPMp.codeGen.visitNode(
         child,
-        divPMp.value,
+        markuparam.node,
         null,
-        divPMp.indent + '      ',
+        markuparam.indent + '      ',
         divPMp
       );
     }
 
-    if (divPMp.maxChildren.length > 0) {
-      divPMp.outerClass += ' maxer';
-      divPMp.style.width = '100%';
-      divPMp.style.pointerEvents = 'none';
-      divPMp.style.backgroundColor = null;
-      divPMp.indent += '      ';
-      this.printDiv(divPMp);
+    if (markuparam.maxChildren.length > 0) {
+      console.log('ELSE if (maxChildren.length > 0), printDiv visitNode');
+      markuparam.outerClass += ' maxer';
+      markuparam.style.width = '100%';
+      markuparam.style.pointerEvents = 'none';
+      markuparam.style.backgroundColor = null;
+      markuparam.indent += '      ';
+      this.printDiv(divPMp, markuparam);
       first = true;
 
-      for (const child of divPMp.maxChildren) {
-        console.log(
-          'visitNode divPMp.maxChildren: ',
-          divPMp.maxChildren.length
-        );
+      for (const child of markuparam.maxChildren) {
         divPMp.codeGen.visitNode(
           child,
-          divPMp.value,
+          markuparam.n9de,
           first ? null : newLastVertical,
-          divPMp.indent + '          ',
+          markuparam.indent + '          ',
           divPMp
         );
         first = false;
       }
-      this.markup.print(`        </div>`, divPMp.indent);
-      this.markup.print(`      </div>`, divPMp.indent);
+      divPMp.codeGen.print(`        </div>`, markuparam.indent);
+      divPMp.codeGen.print(`      </div>`, markuparam.indent);
     }
-    if (divPMp.content != null) {
-      console.log('content: != null');
-      if (divPMp.value.name.charAt(0) === '$') {
-        const varName = divPMp.value.name.substring(1);
-        for (const piece of divPMp.content) {
-          this.markup.print(piece, divPMp.indent + '        ');
+    if (markuparam.content != null) {
+      if (markuparam.node.name.charAt(0) === '$') {
+        console.log('ELSE if (content != null), for (const piece of content)');
+        // const varName = divPMp.value.name.substring(1);
+        for (const piece of markuparam.content) {
+          divPMp.codeGen.print(piece, markuparam.indent + '        ');
         }
       } else {
-        for (const piece of divPMp.content) {
-          this.markup.print(piece, divPMp.indent + '      ');
+        console.log('ELSE else, for (const piece of content)');
+        for (const piece of markuparam.content) {
+          divPMp.codeGen.print(piece, markuparam.indent + '      ');
         }
       }
     }
-    this.markup.print(`    </div>`, divPMp.indent);
+    console.log('ELSE end, print');
+    divPMp.codeGen.print(`    </div>`, markuparam.indent);
   }
 }
