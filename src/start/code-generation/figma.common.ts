@@ -230,16 +230,16 @@ function visitNode(node, parent, lastVertical, indent, div?: DivParamMarkup) {
     currStyle: 0,
     ps: [],
   } as ParagraphParamMarkup;
-  layoutParamStyle.isVertical = true;
   bounds = layoutParamStyle.value;
   outerStyle = layoutParamStyle.outerStyle;
   outerClass = layoutParamStyle.outerClass;
+  layoutParamStyle.isVertical = false;
   layoutStyle.invoke(cHorizontal, layoutParamStyle);
+  layoutParamStyle.isVertical = true;
   layoutStyle.invoke(cVertical, layoutParamStyle);
   bounds = layoutParamStyle.value;
   outerStyle = layoutParamStyle.outerStyle;
   outerClass = layoutParamStyle.outerClass;
-
   if (
     node.type === Nodes.FRAME ||
     node.type === Nodes.INSTANCE ||
