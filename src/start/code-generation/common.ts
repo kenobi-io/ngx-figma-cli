@@ -1,31 +1,8 @@
 import {
-  LayoutStyle,
-  Style,
-  BackgroundStyle,
-  EffectStyle,
-  EffectSetStyle,
-  StrokeStyle,
-  BackgroundSetStyle,
-  LayoutSetStyle,
-  StrokeSetStyle,
-  FontSetStyle,
-  FontStyle,
-  ParagraphSetMarkup,
-  ParagraphMarkup,
-  Markup,
-  ParagraphParamMarkup,
-  Nodes,
-  DivSetMarkup,
-  DivMarkup,
-  DivParamMarkup,
+  ComponentParamMarkup,
   RestApiService,
   ImagesRequest,
-  ImageRequest,
-  Vectors,
-  Groups,
-  LayoutConstraints,
-  LayoutParamStyle,
-  RectangleFigma,
+  SchemaFigma,
 } from '../../core';
 import { catchError, concatMap } from 'rxjs/operators';
 import { createComponent } from './figma.common';
@@ -130,7 +107,7 @@ function errHandler(err: any) {
   return err;
 }
 
-export async function main(result) {
+export async function main(result: SchemaFigma) {
   console.log('==========================================');
   let resp = result;
   let data = resp;
@@ -148,14 +125,6 @@ export async function main(result) {
 
   let guids = vectorList.join(',');
   let api = new RestApiService();
-
-  const div = {} as DivParamMarkup;
-  div.codeGen = {} as {
-    createComponent: Function;
-    visitNode: Function;
-    print: Function;
-  };
-  div.codeGen.createComponent = createComponent;
 
   api
     .get(ImagesRequest, guids)
@@ -201,7 +170,7 @@ export async function main(result) {
         const child = canvas.children[i];
         if (child.name.charAt(0) === '#' && child.visible !== false) {
           const child = canvas.children[i];
-          createComponent(child, images, componentMap, div);
+          createComponent(child, images, componentMap);
         }
       }
 

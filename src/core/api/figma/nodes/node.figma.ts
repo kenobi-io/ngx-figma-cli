@@ -1,4 +1,4 @@
-import { Nodes } from "../properties/properties";
+import { Nodes } from '../properties/properties';
 
 /**
  * Node type indicates what kind of node you are working with: for example,

@@ -1,10 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "lib": [
-      "es2018",
-      "dom"
-    ],
+    "lib": ["es2018", "dom"],
     "module": "commonjs",
     "moduleResolution": "node",
     "noEmitOnError": true,
@@ -19,25 +16,15 @@
     "sourceMap": true,
     "strictNullChecks": false,
     "target": "es6",
-    "types": [
-      "jest",
-      "node"
-    ],
-    "typeRoots": [
-      "./node_modules/@types",
-      "./node_modules/@figma"
-    ],
-    "paths": {
-    }
+    "types": ["jest", "node"],
+    "typeRoots": ["./node_modules/@types"],
+    "paths": {}
   },
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/**/*"],
   "exclude": [
     "src/components/**/*",
     "src/*/files/**/*",
     "**/*.spec.ts",
-    "**/test-setup.ts",
-
+    "**/test-setup.ts"
   ]
 }

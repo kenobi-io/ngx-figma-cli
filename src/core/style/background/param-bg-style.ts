@@ -1,11 +1,6 @@
-import {
-    ComponentFigma,
-    FrameFigma,
-    InstanceFigma,
-    RectangleFigma
-} from "../../api";
-import { ParamStyle } from "../param-style";
+import { ParamStyle } from '../param-style';
+import { ItemNode } from '../../api/figma/nodes/figma';
 
 export interface BackgroundParamStyle extends ParamStyle {
-    value: FrameFigma | ComponentFigma | InstanceFigma | RectangleFigma;
+  value: ItemNode;
 }

@@ -1,7 +1,7 @@
 import { SetMarkup } from '../set-markup';
 import { Markup } from '../markup';
 import { Nodes, Characters } from '../../api';
-import { DivParamMarkup } from './div-param-markup';
+import { ComponentParamMarkup } from './div-param-markup';
 
 export interface DivSetMarkup {
   // extends SetMarkup<Partial<Markup>, Nodes | Characters> {
@@ -18,6 +18,6 @@ export interface DivSetMarkup {
     centerChildren,
     maxChildren,
     indent,
-    divPMp: DivParamMarkup
+    divPMp: ComponentParamMarkup
   ): void;
 }

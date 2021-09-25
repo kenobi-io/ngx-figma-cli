@@ -13,6 +13,7 @@ export * from './effect/effect-style';
 export * from './font/font-param-style';
 export * from './font/font-set-style';
 export * from './font/font-style';
+export * from './font/text-font-style';
 
 export * from './stroke/stroke-param-style';
 export * from './stroke/stroke-set-style';

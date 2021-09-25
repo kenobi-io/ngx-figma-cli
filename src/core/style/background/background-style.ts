@@ -6,7 +6,7 @@ import { InnerArrow } from 'src/core/inner-arrow';
 
 export class BackgroundStyle implements BackgroundSetStyle {
   public style: Partial<Style>;
-  private backgroundMap: Map<TypePaints | Nodes, InnerArrow>;
+  private backgroundMap: Map<TypePaints | Nodes | string, InnerArrow>;
 
   constructor(
     style: Partial<Style>,
@@ -16,11 +16,14 @@ export class BackgroundStyle implements BackgroundSetStyle {
     this.backgroundMap = bgsMap ? bgsMap : this.background();
   }
 
-  public invoke(bgEnum: TypePaints | Nodes, param: BackgroundParamStyle): void {
+  public invoke(
+    bgEnum: TypePaints | Nodes | string,
+    param: BackgroundParamStyle
+  ): void {
     this.backgroundMap.get(bgEnum).call(this, param);
   }
 
-  private background(): Map<TypePaints | Nodes, InnerArrow> {
+  private background(): Map<TypePaints | Nodes | string, InnerArrow> {
     return new Map<TypePaints | Nodes, InnerArrow>()
       .set(TypePaints.IMAGE, (param: BackgroundParamStyle) => this.image(param))
       .set(TypePaints.SOLID, (param: BackgroundParamStyle) => this.solid(param))
@@ -41,7 +44,7 @@ export class BackgroundStyle implements BackgroundSetStyle {
   }
 
   private image(bgP: BackgroundParamStyle): void {
-    const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+    const lastFill = this.style.lastPaint(bgP.value.fills);
     if (lastFill) {
       this.style.backgroundImage = this.style.imageUrl(lastFill.imageRef);
       if (lastFill.scaleMode === 'FILL') {
@@ -53,7 +56,7 @@ export class BackgroundStyle implements BackgroundSetStyle {
   }
 
   private solid(bgP: BackgroundParamStyle): void {
-    const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+    const lastFill = this.style.lastPaint(bgP.value.fills);
     if (lastFill) {
       this.style.backgroundColor = this.style.colorToString(lastFill.color);
       lastFill.opacity && (this.style.opacity = `${lastFill.opacity}`);
@@ -61,14 +64,14 @@ export class BackgroundStyle implements BackgroundSetStyle {
   }
 
   private linearGradient(bgP: BackgroundParamStyle): void {
-    const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+    const lastFill = this.style.lastPaint(bgP.value.fills);
     if (lastFill) {
       this.style.background = this.style.paintToLinearGradient(lastFill);
     }
   }
 
   private radialGradient(bgP: BackgroundParamStyle): void {
-    const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+    const lastFill = this.style.lastPaint(bgP.value.fills);
     if (lastFill) {
       this.style.background = this.style.paintToRadialGradient(lastFill);
     }
@@ -84,7 +87,7 @@ export class BackgroundStyle implements BackgroundSetStyle {
   }
 
   private text(bgP: BackgroundParamStyle): void {
-    const lastFill = this.style.lastPaint((bgP.value as RectangleFigma).fills);
+    const lastFill = this.style.lastPaint(bgP.value.fills);
     if (lastFill) {
       this.style.color = this.style.colorToString(lastFill.color);
     }

@@ -3,6 +3,7 @@ import {
   ColorPropertyFigma,
   PaintPropertyFigma,
   EffectPropertyFigma,
+  Background,
 } from '../api';
 
 export class Style extends DeclarationStyle {
@@ -11,12 +12,12 @@ export class Style extends DeclarationStyle {
   // separate behavior from sturcture
 
   public colorToString(color: ColorPropertyFigma | any): string {
-    return `rgba(${Math.round(color.r * 255)},${Math.round(
+    return `rgba(${Math.round(color.r * 255)}, ${Math.round(
       color.g * 255
-    )},${Math.round(color.b * 255)},${color.a})`;
+    )}, ${Math.round(color.b * 255)}, ${color.a})`;
   }
 
-  public paintToRadialGradient(paint: PaintPropertyFigma): string {
+  public paintToRadialGradient(paint: Background): string {
     const stops = paint.gradientStops
       .map((stop: { color: any; position: number }) => {
         return `${this.colorToString(stop.color)} 
@@ -27,7 +28,7 @@ export class Style extends DeclarationStyle {
     return `radial-gradient(${stops})`;
   }
 
-  public paintToLinearGradient(paint: PaintPropertyFigma): string {
+  public paintToLinearGradient(paint: Background): string {
     const handles = paint.gradientHandlePositions;
     const handle0 = handles[0];
     const handle1 = handles[1];
@@ -68,7 +69,7 @@ export class Style extends DeclarationStyle {
     )}/${squash.substring(4, 8)}/${squash.substring(8)})`;
   }
 
-  public lastPaint(paints: PaintPropertyFigma[]): PaintPropertyFigma | null {
+  public lastPaint(paints: Background[]): Background | null {
     if (paints && paints.length > 0) {
       return paints[paints.length - 1];
     }

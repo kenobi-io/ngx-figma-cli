@@ -1,36 +1,24 @@
 import {
   LayoutStyle,
-  Style,
   BackgroundStyle,
   EffectStyle,
-  EffectSetStyle,
   StrokeStyle,
-  BackgroundSetStyle,
-  LayoutSetStyle,
-  StrokeSetStyle,
-  FontSetStyle,
-  FontStyle,
-  ParagraphSetMarkup,
   ParagraphMarkup,
   Markup,
   ParagraphParamMarkup,
   Nodes,
-  DivSetMarkup,
-  DivMarkup,
-  DivParamMarkup,
-  RestApiService,
-  ImagesRequest,
-  ImageRequest,
-  Vectors,
-  Groups,
-  LayoutConstraints,
   LayoutParamStyle,
-  RectangleFigma,
+  byTextFontStyle,
+  divMarkup,
+  byHashMarkup,
+  vectorMarkup,
+  markup,
+  NodeParamMarkup,
+  Style,
+  ItemNode,
 } from '../../core';
-
 const fs = require('fs');
 
-const VECTOR_TYPES = ['VECTOR', 'LINE', 'REGULAR_POLYGON', 'ELLIPSE'];
 const GROUP_TYPES = ['GROUP', 'BOOLEAN_OPERATION'];
 
 export function colorString(color) {
@@ -39,71 +27,10 @@ export function colorString(color) {
   )}, ${Math.round(color.b * 255)}, ${color.a})`;
 }
 
-function dropShadow(effect) {
-  return `${effect.offset.x}px ${effect.offset.y}px ${
-    effect.radius
-  }px ${colorString(effect.color)}`;
-}
-
-function innerShadow(effect) {
-  return `inset ${effect.offset.x}px ${effect.offset.y}px ${
-    effect.radius
-  }px ${colorString(effect.color)}`;
-}
-
-function imageURL(hash) {
-  const squash = hash.split('-').join('');
-  return `url(https://s3-us-west-2.amazonaws.com/figma-alpha/img/${squash.substring(
-    0,
-    4
-  )}/${squash.substring(4, 8)}/${squash.substring(8)})`;
-}
-
-function backgroundSize(scaleMode) {
-  if (scaleMode === 'FILL') {
-    return 'cover';
-  }
-}
-
 function nodeSort(a, b) {
   if (a.absoluteBoundingBox.y < b.absoluteBoundingBox.y) return -1;
   else if (a.absoluteBoundingBox.y === b.absoluteBoundingBox.y) return 0;
   else return 1;
-}
-
-function getPaint(paintList) {
-  if (paintList && paintList.length > 0) {
-    return paintList[paintList.length - 1];
-  }
-
-  return null;
-}
-
-function paintToLinearGradient(paint) {
-  const handles = paint.gradientHandlePositions;
-  const handle0 = handles[0];
-  const handle1 = handles[1];
-
-  const ydiff = handle1.y - handle0.y;
-  const xdiff = handle0.x - handle1.x;
-
-  const angle = Math.atan2(-xdiff, -ydiff);
-  const stops = paint.gradientStops
-    .map((stop) => {
-      return `${colorString(stop.color)} ${Math.round(stop.position * 100)}%`;
-    })
-    .join(', ');
-  return `linear-gradient(${angle}rad, ${stops})`;
-}
-
-function paintToRadialGradient(paint) {
-  const stops = paint.gradientStops
-    .map((stop) => {
-      return `${colorString(stop.color)} ${Math.round(stop.position * 60)}%`;
-    })
-    .join(', ');
-
-  return `radial-gradient(${stops})`;
 }
 
 function expandChildren(
@@ -162,16 +89,12 @@ function expandChildren(
 
   return added - offset;
 }
-let markup = new Markup();
-let divSetMarkup = new DivMarkup(markup);
+let markupInst = new Markup();
 
-function visitNode(node, parent, lastVertical, indent, div?: DivParamMarkup) {
-  // const style = new Style();
-  // const markup = new Markup();
-
+function createNode(node: ItemNode, parent, lastVertical, indent) {
   let content = null;
   let img = null;
-  const styles = new Style(); // TODO: styles rename to style
+  const style = new Style();
   let minChildren = [];
   const maxChildren = [];
   const centerChildren = [];
@@ -208,12 +131,11 @@ function visitNode(node, parent, lastVertical, indent, div?: DivParamMarkup) {
   if (node.order) {
     outerStyle.zIndex = node.order;
   }
-  const layoutStyle = new LayoutStyle(styles);
-  const backgroundStyle = new BackgroundStyle(styles);
-  const effectStyle = new EffectStyle(styles);
-  const strokeStyle = new StrokeStyle(styles);
-  const fontStyle = new FontStyle(styles);
-  const paragraphSetMarkup = new ParagraphMarkup(markup);
+  const layoutStyle = new LayoutStyle(style);
+  const backgroundStyle = new BackgroundStyle(style);
+  const effectStyle = new EffectStyle(style);
+  const strokeStyle = new StrokeStyle(style);
+  const paragraphSetMarkup = new ParagraphMarkup(markupInst);
 
   const layoutParamStyle: LayoutParamStyle = {
     value: bounds,
@@ -223,23 +145,22 @@ function visitNode(node, parent, lastVertical, indent, div?: DivParamMarkup) {
   };
   const paragraphParamMarkup = {
     content: null,
-    fontSetStyle: fontStyle,
     value: node,
     para: '',
     styleCache: {},
     currStyle: 0,
     ps: [],
   } as ParagraphParamMarkup;
-  bounds = layoutParamStyle.value;
+
   outerStyle = layoutParamStyle.outerStyle;
   outerClass = layoutParamStyle.outerClass;
   layoutParamStyle.isVertical = false;
   layoutStyle.invoke(cHorizontal, layoutParamStyle);
   layoutParamStyle.isVertical = true;
   layoutStyle.invoke(cVertical, layoutParamStyle);
-  bounds = layoutParamStyle.value;
   outerStyle = layoutParamStyle.outerStyle;
   outerClass = layoutParamStyle.outerClass;
+
   if (
     node.type === Nodes.FRAME ||
     node.type === Nodes.INSTANCE ||
@@ -247,9 +168,7 @@ function visitNode(node, parent, lastVertical, indent, div?: DivParamMarkup) {
   ) {
     backgroundStyle.invoke(node.type, { value: node });
   } else if (node.type === Nodes.RECTANGLE) {
-    const lastFill = backgroundStyle.style.lastPaint(
-      (node as RectangleFigma).fills
-    );
+    const lastFill = backgroundStyle.style.lastPaint(node.fills);
     backgroundStyle.invoke(lastFill.type, { value: node });
     for (let effect of node.effects) {
       effectStyle.invoke(effect.type, { value: effect });
@@ -257,32 +176,44 @@ function visitNode(node, parent, lastVertical, indent, div?: DivParamMarkup) {
     strokeStyle.invoke(node.type, { value: node });
   } else if (node.type === 'TEXT') {
     backgroundStyle.invoke(node.type, { value: node });
-    fontStyle.invoke(node.type, { value: node.style });
+    byTextFontStyle(style, node.style);
     paragraphSetMarkup.invoke(node.type, paragraphParamMarkup);
     content = paragraphParamMarkup.content;
   }
-  divSetMarkup.invoke(
+
+  const property: NodeParamMarkup = {
     node,
     parent,
     content,
-    styles,
+    style,
     outerStyle,
     outerClass,
     innerClass,
     minChildren,
     centerChildren,
     maxChildren,
+    nodeName: 'div',
     indent,
-    div
-  );
+  };
+
+  if (parent != null) {
+    divMarkup(markupInst, property);
+  }
+  if (node.id !== markupInst.component.id && node.name.charAt(0) === '#') {
+    byHashMarkup(markupInst, property, divMarkup, createComponent);
+  } else if (node.type === Nodes.VECTOR) {
+    vectorMarkup(markupInst, property);
+  } else {
+    markup(markupInst, property, divMarkup, createNode);
+  }
+
+  if (parent != null) {
+    markupInst.append(`  </div>`, indent);
+    markupInst.append(`</div>`, indent);
+  }
 }
 
-export const createComponent = (
-  component,
-  imgMap,
-  componentMap,
-  div?: DivParamMarkup
-) => {
+export const createComponent = (component, imgMap, componentMap) => {
   const name = 'C' + component.name.replace(/\W+/g, '');
   const instance = name + component.id.replace(';', 'S').replace(':', 'D');
 
@@ -309,17 +240,16 @@ export const createComponent = (
     });
   }
 
-  function print(msg, indent) {
+  function append(msg, indent) {
     doc += `${indent}${msg}\n`;
   }
 
-  div.component = component;
-  div.imgMap = imgMap;
-  div.componentMap = componentMap;
-  div.codeGen.visitNode = visitNode;
-  div.codeGen.print = print;
+  markupInst.component = component;
+  markupInst.imgMap = imgMap;
+  markupInst.componentMap = componentMap;
+  markupInst.append = append;
 
-  visitNode(component, null, null, '  ', div);
+  createNode(component, null, null, '  ');
 
   const htmPath = `src/components/${name}.component.html`;
   fs.writeFile(htmPath, doc, function (err) {
@@ -332,5 +262,3 @@ export const createComponent = (
     doc,
   };
 };
-
-// module.exports = { createComponent, colorString }

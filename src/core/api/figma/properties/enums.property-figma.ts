@@ -188,19 +188,6 @@ export enum LayoutConstraints {
   TOP_BOTTOM = 'TOP_BOTTOM',
 }
 
-export enum HorizontalLayoutConstraints {
-  LEFT_RIGHT = 'LEFT_RIGHT',
-  RIGHT = 'RIGHT',
-  CENTER = 'CENTER',
-  SCALE = 'SCALE',
-}
-
-export enum VerticalLayoutConstraints {
-  TOP_BOTTOM = 'TOP_BOTTOM',
-  CENTER = 'CENTER',
-  SCALE = 'SCALE',
-}
-
 export enum LayoutGridPatterns {
   COLUMNS = 'COLUMNS',
   ROWS = 'ROWS',

@@ -10,11 +10,17 @@ import { InnerArrow } from '../../inner-arrow';
 
 export class LayoutStyle implements LayoutSetStyle {
   public style: Partial<Style>;
-  private layoutMap: Map<LayoutConstraints | string, InnerArrow>;
+  private layoutMap: Map<
+    HorizontalLayoutConstraints | VerticalLayoutConstraints | string,
+    InnerArrow
+  >;
 
   constructor(
     style: Partial<Style>,
-    layoutMap?: Map<LayoutConstraints | string, InnerArrow>
+    layoutMap?: Map<
+      HorizontalLayoutConstraints | VerticalLayoutConstraints | string,
+      InnerArrow
+    >
   ) {
     this.style = style;
     this.layoutMap = layoutMap ? layoutMap : this.layout();
@@ -22,9 +28,9 @@ export class LayoutStyle implements LayoutSetStyle {
 
   public invoke(
     layoutConstraint:
-      | LayoutConstraints
       | HorizontalLayoutConstraints
-      | VerticalLayoutConstraints,
+      | VerticalLayoutConstraints
+      | string,
     layoutParamStyle: LayoutParamStyle
   ): void {
     if (!layoutParamStyle.isVertical) {
