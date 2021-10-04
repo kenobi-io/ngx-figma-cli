@@ -95,39 +95,6 @@ export enum LineHeightUnits {
   'INTRINSIC_%' = 'INTRINSIC_%',
 }
 
-/**
- * This type is a string enum with the following possible values
- * Normal blends:
- * "PASS_THROUGH" (Only applicable to objects with children)
- * "NORMAL"
- *
- * Darken:
- * "DARKEN"
- * "MULTIPLY"
- * "LINEAR_BURN"
- * "COLOR_BURN"
- *
- * Lighten:
- * "LIGHTEN"
- * "SCREEN"
- * "LINEAR_DODGE"
- * "COLOR_DODGE"
- *
- * Contrast:
- * "OVERLAY"
- * "SOFT_LIGHT"
- * "HARD_LIGHT"
- *
- * Inversion:
- * "DIFFERENCE"
- * "EXCLUSION"
- *
- * Component:
- * "HUE"
- * "SATURATION"
- * "COLOR"
- * "LUMINOSITY"
- */
 export enum BlendModes {
   // Normal blends:
   /** (Only applicable to objects with children) */

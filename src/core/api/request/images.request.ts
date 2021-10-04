@@ -1,7 +1,7 @@
-import { environment } from "../../../environments/index";
-import { InvokeRequest } from "./invoke.request";
-import { Headers } from "node-fetch";
-import fetch from "node-fetch";
+import { environment } from '../../../environments/index';
+import { InvokeRequest } from './invoke.request';
+import { Headers } from 'node-fetch';
+import fetch from 'node-fetch';
 
 export class ImagesRequest<T> implements InvokeRequest<T> {
   public imagesUrl: string;
@@ -9,7 +9,7 @@ export class ImagesRequest<T> implements InvokeRequest<T> {
 
   constructor() {
     this.header = new Headers();
-    this.header.append("X-Figma-Token", environment.token);
+    this.header.append('X-Figma-Token', environment.token);
     this.imagesUrl = `${environment.url}/${environment.versionImage}/${environment.fileKey}`;
   }
 
@@ -19,8 +19,8 @@ export class ImagesRequest<T> implements InvokeRequest<T> {
     return fetch(this.imagesUrl + param, { headers: this.header })
       .then((response) => {
         if (!response.ok) {
-          console.log("err status", response.status);
-          console.log("err status", response);
+          console.log('err status', response.status);
+          console.log('err status', response);
           throw new Error(response.statusText);
         }
         return response.json();
@@ -28,6 +28,6 @@ export class ImagesRequest<T> implements InvokeRequest<T> {
       .catch((error: Error) => {
         console.error(error);
         throw error;
-      });
+      }) as Promise<T>;
   }
 }

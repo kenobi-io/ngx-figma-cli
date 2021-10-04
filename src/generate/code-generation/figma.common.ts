@@ -16,6 +16,7 @@ import {
   NodeParamMarkup,
   Style,
   ItemNode,
+  ComponentMap,
 } from '../../core';
 const fs = require('fs');
 

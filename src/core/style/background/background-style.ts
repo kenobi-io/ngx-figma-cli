@@ -2,7 +2,7 @@ import { Nodes, TypePaints, FrameFigma, RectangleFigma } from '../../api';
 import { Style } from '../style';
 import { BackgroundParamStyle } from './param-bg-style';
 import { BackgroundSetStyle } from './bg-set-style';
-import { InnerArrow } from 'src/core/inner-arrow';
+import { InnerArrow } from '../../inner-arrow';
 
 export class BackgroundStyle implements BackgroundSetStyle {
   public style: Partial<Style>;

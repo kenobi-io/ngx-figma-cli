@@ -1,8 +1,8 @@
-import { EffectSetStyle } from "./effect-set-style";
-import { EffectParamStyle } from "./effect-param-style";
-import { Effects } from "../../api";
-import { Style } from "../style";
-import { InnerArrow } from "src/core/inner-arrow";
+import { EffectSetStyle } from './effect-set-style';
+import { EffectParamStyle } from './effect-param-style';
+import { Effects } from '../../api';
+import { Style } from '../style';
+import { InnerArrow } from '../../inner-arrow';
 
 export class EffectStyle implements EffectSetStyle {
   public style: Partial<Style>;

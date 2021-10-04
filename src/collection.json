@@ -1,10 +1,14 @@
 {
-  "$schema": "../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "$schema": "../../../node_modules/@angular-devkit/schematics/collection-schema.json",
   "schematics": {
-    "start": {
+    "generate": {
       "description": "A schematic using a source and a schema to validate options.",
-      "factory": "./start",
-      "schema": "./start/schema.json"
+      "factory": "./generate",
+      "schema": "./generate/schema.json"
+    },
+    "ng-add": {
+      "description": "Add my library to the project.",
+      "factory": "./ng-add/index#ngAdd"
     }
   }
 }

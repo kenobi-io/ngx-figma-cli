@@ -2,7 +2,7 @@ import { Nodes } from '../../api';
 import { ParagraphSetMarkup } from './paragraph-set-markup';
 import { ParagraphParamMarkup } from './paragraph-param-markup';
 import { Markup } from '../markup';
-import { InnerArrow } from 'src/core/inner-arrow';
+import { InnerArrow } from '../../inner-arrow';
 
 export class ParagraphMarkup implements ParagraphSetMarkup {
   public markup: Partial<Markup>;

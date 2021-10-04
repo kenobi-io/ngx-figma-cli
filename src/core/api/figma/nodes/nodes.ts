@@ -16,4 +16,30 @@ export { TextFigma } from './text.figma';
 export { SliceFigma } from './slice.figma';
 export { InstanceFigma } from './instance.figma';
 export { FileNodeFigma } from './file-node.figma';
-export * from './figma';
+export {
+  SchemaFigma,
+  ItemNode,
+  ComponentSets,
+  StyleSets,
+  Component,
+  DocFigma,
+  ItemDocument,
+  ColorStyle,
+  AbsoluteBoundingBox,
+  Background,
+  BackgroundBlendModes,
+  ChildBlendModes,
+  FluffyChild,
+  TentacledChild,
+  StickyChild,
+  IndigoChild,
+  Constraints,
+  Horizontals,
+  Verticals,
+  HorizontalLayoutConstraints,
+  VerticalLayoutConstraints,
+  StrokeAlignOuts,
+  TextStyle,
+  LayoutGrid,
+  PrototypeDevice,
+} from './figma';

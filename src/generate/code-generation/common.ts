@@ -3,6 +3,7 @@ import {
   RestApiService,
   ImagesRequest,
   SchemaFigma,
+  ComponentMap,
 } from '../../core';
 import { catchError, concatMap } from 'rxjs/operators';
 import { createComponent } from './figma.common';
@@ -10,8 +11,8 @@ import { createComponent } from './figma.common';
 const fetch = require('node-fetch');
 const fs = require('fs');
 
-let devToken =
-  process.env.DEV_TOKEN || '203090-63cd909a-5ce6-4370-8b53-e19f27becaa8';
+// let devToken =
+//   process.env.DEV_TOKEN || '203090-63cd909a-5ce6-4370-8b53-e19f27becaa8';
 
 // if (process.argv.length < 3) {
 //   console.log('Usage: node setup.js <file-key> [figma-dev-token]');

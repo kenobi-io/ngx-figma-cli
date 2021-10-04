@@ -25,6 +25,6 @@ export class FilesRequest<T> implements InvokeRequest<T> {
       .catch((error: Error) => {
         console.error(error);
         throw error;
-      });
+      }) as Promise<T>;
   }
 }

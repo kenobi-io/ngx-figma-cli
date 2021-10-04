@@ -1,3 +1,4 @@
+import { Nodes } from '../properties/enums.property-figma';
 export interface SchemaFigma {
   document: DocFigma;
   components: { [key: string]: Component };
@@ -14,7 +15,7 @@ export interface SchemaFigma {
 
 export interface ItemNode {
   absoluteBoundingBox: AbsoluteBoundingBox;
-  blendMode: ChildBlendMode;
+  blendMode: ChildBlendModes | BackgroundBlendModes;
   characters: string;
   characterStyleOverrides: any[];
   constraints: Constraints;
@@ -23,15 +24,15 @@ export interface ItemNode {
   id: string;
   layoutVersion: number;
   name: string;
-  strokeAlign: StrokeAlignEnum;
-  strokes: any[];
+  strokeAlign: StrokeAlignOuts;
+  strokes: Background[];
   strokeWeight: number;
   style: TextStyle;
   styleOverrideTable: ComponentSets;
-  type: string;
+  type: string | Nodes;
   background?: Background[];
   backgroundColor?: ColorStyle;
-  children?: IndigoChild[];
+  children?: ItemNode[];
   clipsContent?: boolean;
   cornerRadius?: number;
   rectangleCornerRadii?: number[];
@@ -83,7 +84,7 @@ export interface AbsoluteBoundingBox {
 }
 
 export interface Background {
-  blendMode: BackgroundBlendMode;
+  blendMode: BackgroundBlendModes;
   type: string;
   color: ColorStyle;
   visible?: boolean;
@@ -94,7 +95,7 @@ export interface Background {
   gradientStops;
 }
 
-export enum BackgroundBlendMode {
+export enum BackgroundBlendModes {
   NORMAL = 'NORMAL',
 }
 
@@ -102,7 +103,7 @@ export enum BackgroundBlendMode {
 //   SOLID = 'SOLID',
 // }
 
-export enum ChildBlendMode {
+export enum ChildBlendModes {
   PASS_THROUGH = 'PASS_THROUGH',
 }
 
@@ -110,7 +111,7 @@ export interface FluffyChild {
   id: string;
   name: string;
   type: string;
-  blendMode: ChildBlendMode;
+  blendMode: ChildBlendModes;
   children?: TentacledChild[];
   absoluteBoundingBox: AbsoluteBoundingBox;
   constraints: Constraints;
@@ -119,7 +120,7 @@ export interface FluffyChild {
   fills: Background[];
   strokes: Background[];
   strokeWeight: number;
-  strokeAlign: StrokeAlignEnum;
+  strokeAlign: StrokeAlignOuts;
   backgroundColor?: ColorStyle;
   exportSettings: any[];
   effects: any[];
@@ -132,7 +133,7 @@ export interface TentacledChild {
   id: string;
   name: string;
   type: string;
-  blendMode: ChildBlendMode;
+  blendMode: ChildBlendModes;
   children?: StickyChild[];
   absoluteBoundingBox: AbsoluteBoundingBox;
   constraints: Constraints;
@@ -141,7 +142,7 @@ export interface TentacledChild {
   fills: Background[];
   strokes: any[];
   strokeWeight: number;
-  strokeAlign: StrokeAlignEnum;
+  strokeAlign: StrokeAlignOuts;
   backgroundColor?: ColorStyle;
   effects: any[];
   preserveRatio?: boolean;
@@ -156,7 +157,7 @@ export interface StickyChild {
   absoluteBoundingBox: AbsoluteBoundingBox;
   background?: Background[];
   backgroundColor?: ColorStyle;
-  blendMode: ChildBlendMode;
+  blendMode: ChildBlendModes;
   characters?: string;
   characterStyleOverrides?: any[];
   children?: IndigoChild[];
@@ -169,7 +170,7 @@ export interface StickyChild {
   layoutVersion?: number;
   name: string;
   rectangleCornerRadii?: number[];
-  strokeAlign: StrokeAlignEnum;
+  strokeAlign: StrokeAlignOuts;
   strokes: any[];
   strokeWeight: number;
   style?: TextStyle;
@@ -179,7 +180,7 @@ export interface StickyChild {
 
 export interface IndigoChild {
   absoluteBoundingBox: AbsoluteBoundingBox;
-  blendMode: ChildBlendMode;
+  blendMode: ChildBlendModes;
   characters: string;
   characterStyleOverrides: any[];
   constraints: Constraints;
@@ -188,7 +189,7 @@ export interface IndigoChild {
   id: string;
   layoutVersion: number;
   name: string;
-  strokeAlign: StrokeAlignEnum;
+  strokeAlign: StrokeAlignOuts;
   strokes: any[];
   strokeWeight: number;
   style: TextStyle;
@@ -198,18 +199,21 @@ export interface IndigoChild {
 
 export interface Constraints {
   vertical: Verticals;
-  horizontal: StrokeAlign;
+  horizontal: Horizontals;
 }
 
-export enum StrokeAlign {
+export enum Horizontals {
   CENTER = 'CENTER',
   LEFT = 'LEFT',
   SCALE = 'SCALE',
+  LEFT_RIGHT = 'LEFT_RIGHT',
 }
 
 export enum Verticals {
   SCALE = 'SCALE',
   TOP = 'TOP',
+  TOP_BOTTOM = 'TOP_BOTTOM',
+  BOTTOM = 'BOTTOM',
 }
 
 // export enum LayoutConstraints {
@@ -233,7 +237,7 @@ export enum VerticalLayoutConstraints {
   SCALE = 'SCALE',
 }
 
-export enum StrokeAlignEnum {
+export enum StrokeAlignOuts {
   CENTER = 'CENTER',
   INSIDE = 'INSIDE',
   OUTSIDE = 'OUTSIDE',

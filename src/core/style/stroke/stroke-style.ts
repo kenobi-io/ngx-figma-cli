@@ -1,8 +1,8 @@
-import { Style } from "../style";
-import { Nodes, TypePaints } from "../../api";
-import { StrokeSetStyle } from "./stroke-set-style";
-import { StrokeParamStyle } from "./stroke-param-style";
-import { InnerArrow } from "src/core/inner-arrow";
+import { Style } from '../style';
+import { Nodes, TypePaints } from '../../api';
+import { StrokeSetStyle } from './stroke-set-style';
+import { StrokeParamStyle } from './stroke-param-style';
+import { InnerArrow } from '../../inner-arrow';
 
 export class StrokeStyle implements StrokeSetStyle {
   public style: Partial<Style>;

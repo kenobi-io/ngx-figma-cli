@@ -2,7 +2,7 @@ import { Markup } from '../markup';
 import { ComponentParamMarkup, NodeParamMarkup } from './div-param-markup';
 import { DivSetMarkup } from './div-set-markup';
 import { Characters, Nodes } from '../../api';
-import { InnerArrow } from 'src/core/inner-arrow';
+import { InnerArrow } from '../../inner-arrow';
 
 export class DivMarkup implements DivSetMarkup {
   public markup: Partial<Markup>;
