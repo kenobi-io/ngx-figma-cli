@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "id": "ngx-figma-cli",
+  "title": "schematics for figma",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      }
+    },
+    "project": {
+      "type": "string",
+      "description": "Project to add the module to"
+    }
+  },
+  "required": [
+    "name",
+    "project"
+  ]
+}
