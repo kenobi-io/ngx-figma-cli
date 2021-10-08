@@ -1,4 +1,5 @@
 import { JsonArray, JsonObject } from '@angular-devkit/core';
+import { Markup } from '../core/markup';
 
 export interface Schema {
   name: string;
@@ -15,4 +16,5 @@ export interface Schema {
   skipSelector: boolean;
   changeDetection: 'OnPush' | 'Default';
   style: 'scss' | 'css';
+  markup: Markup;
 }

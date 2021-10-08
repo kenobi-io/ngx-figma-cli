@@ -25,11 +25,22 @@ import {
   getWorkspace,
   buildDefaultPath,
 } from '@schematics/angular/utility/workspace';
+import { join } from 'path';
 import { Schema } from '../../generate/schema';
 import { buildSelector } from '../../utility';
+import { SchemaFigma } from '../api';
 
 export function contextCreateComponent(optionsSchema: Partial<Schema>): Rule {
   return async (tree: Tree) => {
+    const path = join(__dirname, `./result.json`);
+    console.log('dirname: ', path);
+    const file = tree.read(
+      './dist/out-tsc/tools/generators/ngx-figma-cli/generate/result.json'
+    );
+    const result: SchemaFigma = JSON.parse(file!.toString());
+
+    console.log('result.name', result.name);
+
     const workspace = await getWorkspace(tree);
     const project = workspace.projects.get(optionsSchema.project as string);
 
@@ -61,15 +72,18 @@ export function contextCreateComponent(optionsSchema: Partial<Schema>): Rule {
     validateHtmlSelector(optionsSchema.selector);
     optionsSchema.type = 'Component';
     optionsSchema.skipSelector = false;
+    optionsSchema.flat = false;
     optionsSchema.changeDetection = 'OnPush';
     optionsSchema.style = 'scss';
-    const templateSource = apply(url('./files/components'), [
-      noop(),
-      noop(),
-      noop(),
+    const templateSource = apply(url('./files'), [
+      noop(), // skipTests
+      noop(), // skipStyleFile
+      noop(), // inlineTemplate
       applyTemplates({
         ...strings,
         ...optionsSchema,
+        'if-flat': (s: string) => (optionsSchema.flat ? '' : s),
+        // tf: testFunc.bind({ id: '123', name: '64562' }),
       }),
       !optionsSchema.type
         ? forEach(((file) => {

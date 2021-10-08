@@ -1,9 +1,8 @@
-import { ComponentMap } from '../component-map';
+import { ComponentMap } from '../component';
 
-export class Markup {
+export interface Markup {
   doc: string;
   component: any;
   imgMap: [];
   componentMap: ComponentMap;
-  append: (msg: string, indent: string) => void;
 }

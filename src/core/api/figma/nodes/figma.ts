@@ -91,8 +91,8 @@ export interface Background {
   imageRef: string;
   scaleMode: string;
   opacity: number;
-  gradientHandlePositions;
-  gradientStops;
+  gradientHandlePositions: { x: number; y: number }[];
+  gradientStops: { color: ColorStyle; position: number }[];
 }
 
 export enum BackgroundBlendModes {
