@@ -18,7 +18,8 @@
     "target": "es6",
     "types": ["jest", "node"],
     "typeRoots": ["./node_modules/@types"],
-    "paths": {}
+    "paths": {},
+    "strictBindCallApply": true
   },
   "include": ["src/**/*"],
   "exclude": [
